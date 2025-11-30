@@ -1,84 +1,458 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#00eaff">
+<meta charset="utf-8">
+<title>Buscador PMT - Placas y Licencias</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js")
-          .then(() => console.log("SW registrado"))
-          .catch(err => console.error("Error SW:", err));
-      });
-    }
-  </script>
+<style>
+:root{
+  --cian:#00ffe6;
+  --verde:#00ff6a;
+  --rojo:#ff0044;
+  --bg:#050509;
+  --panel:#05070b;
+  --borde:#00ffe6;
+  --text:#f5f5f5;
+  --accent:#ffdd33;
+  --danger:#ff4d6a;
+  --radius:14px;
+  --shadow:0 0 35px rgba(0,255,230,0.4);
+  --shadow-soft:0 0 18px rgba(0,0,0,0.8);
+}
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GELM — Sistema PMT 2026</title>
-  <link rel="stylesheet" href="menu.css">
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  min-height:100vh;
+  background:radial-gradient(circle at top,#1b0033 0%,#000 45%,#020608 100%);
+  color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+
+.app{
+  width:100%;
+  max-width:1080px;
+  background:rgba(0,0,0,0.88);
+  border-radius:22px;
+  border:2px solid rgba(0,255,230,0.8);
+  box-shadow:var(--shadow),0 0 90px rgba(0,0,0,0.9);
+  padding:22px 18px 20px;
+}
+
+.app-header{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:16px;
+}
+.app-title{
+  font-size:20px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--cian);
+  text-shadow:0 0 14px rgba(0,255,230,0.9);
+}
+.app-sub{
+  font-size:11px;
+  color:#a0f7ff;
+  text-transform:uppercase;
+}
+
+.badge{
+  font-size:11px;
+  padding:3px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,255,230,0.6);
+  color:var(--accent);
+  background:linear-gradient(90deg,rgba(0,0,0,0.7),rgba(0,0,0,0.2));
+}
+
+.search-panel{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:minmax(0,1.6fr) minmax(0,1.1fr) auto;
+  gap:12px;
+  align-items:end;
+}
+@media(max-width:780px){
+  .search-panel{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+label{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:#b0fafa;
+}
+
+input[type="text"]{
+  background:#020308;
+  border-radius:var(--radius);
+  border:1px solid rgba(0,255,230,0.45);
+  padding:10px 12px;
+  font-size:15px;
+  color:var(--text);
+  outline:none;
+  box-shadow:var(--shadow-soft);
+}
+input[type="text"]::placeholder{
+  color:#788a90;
+}
+
+.mode-toggle{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  padding:9px 10px;
+  border-radius:var(--radius);
+  border:1px solid rgba(0,255,230,0.45);
+  background:linear-gradient(135deg,rgba(0,0,0,0.85),rgba(0,10,20,0.96));
+  box-shadow:var(--shadow-soft);
+}
+.mode-toggle label{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  font-size:12px;
+  letter-spacing:0.5px;
+  text-transform:none;
+  color:#e1ffff;
+}
+.mode-toggle input{
+  accent-color:var(--cian);
+}
+
+.btn{
+  border:none;
+  border-radius:var(--radius);
+  padding:11px 18px;
+  background:radial-gradient(circle at top,var(--cian) 0%,#0088ff 40%,#00142a 100%);
+  color:#001015;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  box-shadow:0 0 16px rgba(0,255,230,0.8);
+  transition:transform .12s ease-out,box-shadow .12s ease-out,filter .12s ease-out;
+}
+.btn:hover{
+  transform:translateY(-1px) scale(1.02);
+  box-shadow:0 0 24px rgba(0,255,230,1);
+  filter:brightness(1.05);
+}
+.btn:active{
+  transform:translateY(1px) scale(0.98);
+  box-shadow:0 0 14px rgba(0,255,230,0.7);
+}
+
+/* summary */
+.summary{
+  margin-top:10px;
+  font-size:12px;
+  color:#d0f9ff;
+  min-height:18px;
+}
+
+/* selector resultados */
+.results-panel{
+  margin-top:16px;
+  display:none;
+}
+.results-panel.active{
+  display:block;
+}
+.results-header{
+  font-size:12px;
+  margin-bottom:6px;
+  color:#bffcff;
+}
+select#resultadoSelect{
+  width:100%;
+  background:#050910;
+  color:var(--text);
+  border-radius:var(--radius);
+  border:1px solid rgba(0,255,230,0.55);
+  padding:9px 10px;
+  font-size:13px;
+  box-shadow:var(--shadow-soft);
+}
+
+/* tarjeta detalle */
+.detalle{
+  margin-top:18px;
+  padding:14px 14px 10px;
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(0,0,0,0.94),rgba(0,12,24,0.98));
+  border:1px solid rgba(0,255,230,0.45);
+  box-shadow:0 0 26px rgba(0,0,0,0.95),0 0 28px rgba(0,255,230,0.35);
+}
+.detalle-title{
+  font-size:15px;
+  margin-bottom:6px;
+  color:var(--verde);
+  text-shadow:0 0 10px rgba(0,255,106,0.8);
+}
+.detalle-sub{
+  font-size:11px;
+  color:#9be8ff;
+  margin-bottom:10px;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+.table tr:nth-child(odd){
+  background:rgba(255,255,255,0.01);
+}
+.table th,
+.table td{
+  padding:4px 6px;
+  text-align:left;
+}
+.table th{
+  color:#8de8ff;
+  font-weight:600;
+  text-transform:uppercase;
+  font-size:11px;
+  letter-spacing:0.5px;
+}
+.table td{
+  color:#f0faff;
+}
+
+/* mensajes */
+.msg{
+  margin-top:12px;
+  font-size:12px;
+}
+.msg.error{
+  color:var(--danger);
+}
+.msg.info{
+  color:#b8f4ff;
+}
+.highlight{
+  color:var(--accent);
+  font-weight:600;
+}
+
+/* footer */
+.footer{
+  margin-top:10px;
+  font-size:10px;
+  text-align:right;
+  color:#6fffee;
+}
+</style>
 </head>
-
 <body>
-
-<div class="container">
-
-  <header class="top-header">
-      <img src="icons/icon-192.png" class="logo">
-      <h1 class="titulo">SISTEMA PMT 2026</h1>
-      <h2 class="sub">Unidad de Transportes — PMT Chimaltenango</h2>
-      <h3 class="by">== BY GELM ==</h3>
-  </header>
-
-  <div class="grid-menu">
-
-    <div class="card" onclick="location.href='agen2026.html'">
-      <span class="icon">📘</span>
-      <span class="label">Agenda 2026</span>
+<div class="app">
+  <div class="app-header">
+    <div>
+      <div class="app-title">Buscador PMT</div>
+      <div class="app-sub">Placas &middot; N&uacute;mero de licencia &middot; Historial</div>
     </div>
-
-    <div class="card disabled">
-      <span class="icon">🚨</span>
-      <span class="label">Operativos</span>
-      <span class="mini">Próximamente</span>
-    </div>
-
-    <div class="card disabled">
-      <span class="icon">📝</span>
-      <span class="label">Denuncias</span>
-      <span class="mini">En desarrollo</span>
-    </div>
-
-    <div class="card" onclick="location.href='https://gelm2mil.github.io/gelm/'">
-      <span class="icon">🔎</span>
-      <span class="label">Buscar placas / DPI</span>
-    </div>
-
-    <div class="card disabled">
-      <span class="icon">📦</span>
-      <span class="label">Respaldos</span>
-    </div>
-
-    <div class="card disabled">
-      <span class="icon">📊</span>
-      <span class="label">Reportes</span>
-    </div>
-
-    <div class="card disabled">
-      <span class="icon">⚙</span>
-      <span class="label">Configuración</span>
-    </div>
-
+    <div class="badge">M&oacute;dulo independiente :: by--gelm::</div>
   </div>
 
-  <footer class="pie">
-    <div>© 2026 — GELM</div>
-    <div>PMT — Chimaltenango</div>
-  </footer>
+  <div class="search-panel">
+    <div class="field">
+      <label for="query">Texto de b&uacute;squeda</label>
+      <input id="query" type="text" placeholder="Ej: M-098HJX  &middot;  1918-61907-0805  &middot;  1918619070805">
+    </div>
+    <div class="field">
+      <label>Modo</label>
+      <div class="mode-toggle">
+        <label><input type="radio" name="mode" value="placa" checked> Por placa</label>
+        <label><input type="radio" name="mode" value="licencia"> Por n&uacute;mero de licencia</label>
+      </div>
+    </div>
+    <div class="field">
+      <button id="btnBuscar" class="btn">Buscar</button>
+    </div>
+  </div>
 
+  <div id="summary" class="summary"></div>
+
+  <div id="resultsPanel" class="results-panel">
+    <div class="results-header">Coincidencias encontradas:</div>
+    <select id="resultadoSelect" size="4"></select>
+  </div>
+
+  <div id="detalle" class="detalle" style="display:none;"></div>
+
+  <div id="msg" class="msg info"></div>
+
+  <div class="footer">
+    PMT Chimaltenango &bull; M&oacute;dulo interno de consulta
+  </div>
 </div>
 
+<script>
+const DATA_URL = 'placas.json'; // mismo directorio
+
+let registros = [];
+let ultimosResultados = [];
+
+function normalizarPlaca(txt){
+  if(!txt) return '';
+  return txt.toUpperCase().replace(/[^A-Z0-9]/g,'');
+}
+function normalizarLicencia(txt){
+  if(!txt) return '';
+  return txt.replace(/[^0-9A-Za-z]/g,''); // quita guiones, espacios, etc.
+}
+
+async function cargarDatos(){
+  try{
+    const resp = await fetch(DATA_URL,{cache:'no-store'});
+    registros = await resp.json();
+    document.getElementById('msg').textContent =
+      'Base cargada: ' + registros.length + ' registros disponibles.';
+  }catch(e){
+    console.error(e);
+    document.getElementById('msg').textContent =
+      'Error cargando la base de datos (placas.json).';
+    document.getElementById('msg').className = 'msg error';
+  }
+}
+
+function buscar(){
+  const qRaw = document.getElementById('query').value.trim();
+  const mode = document.querySelector('input[name="mode"]:checked').value;
+  const summary = document.getElementById('summary');
+  const msg = document.getElementById('msg');
+  const panel = document.getElementById('resultsPanel');
+  const select = document.getElementById('resultadoSelect');
+  const detalle = document.getElementById('detalle');
+
+  detalle.style.display = 'none';
+  detalle.innerHTML = '';
+  panel.classList.remove('active');
+  select.innerHTML = '';
+  msg.textContent = '';
+  msg.className = 'msg info';
+
+  if(!qRaw){
+    summary.textContent = '';
+    msg.textContent = 'Escribe una placa o un número de licencia para iniciar la búsqueda.';
+    return;
+  }
+
+  let qNorm;
+  if(mode === 'placa'){
+    qNorm = normalizarPlaca(qRaw);
+  }else{
+    qNorm = normalizarLicencia(qRaw);
+  }
+  if(!qNorm){
+    summary.textContent = '';
+    msg.textContent = 'El texto ingresado no contiene caracteres válidos.';
+    return;
+  }
+
+  let resultados;
+  if(mode === 'placa'){
+    resultados = registros.filter(r => r.placa_norm && r.placa_norm.includes(qNorm));
+  }else{
+    resultados = registros.filter(r => r.licencia_norm && r.licencia_norm.includes(qNorm));
+  }
+
+  ultimosResultados = resultados;
+
+  if(!resultados.length){
+    summary.innerHTML = 'Sin resultados para <span class="highlight">'+qRaw+'</span> ('+mode+').';
+    msg.textContent = 'Verifica si la placa o licencia está bien escrita. Recuerda que la búsqueda ignora espacios y guiones.';
+    msg.className = 'msg error';
+    return;
+  }
+
+  summary.innerHTML = 'Se encontraron <span class="highlight">'+resultados.length+'</span> coincidencia(s) para <span class="highlight">'+qRaw+'</span> buscando por '+mode+'.';
+
+  if(resultados.length === 1){
+    mostrarDetalle(resultados[0]);
+  }else{
+    panel.classList.add('active');
+    resultados.forEach((r,idx)=>{
+      const opt = document.createElement('option');
+      const placa = r.placa || 'SIN PLACA';
+      const lic = r.licencia || 'SIN LICENCIA';
+      const fecha = r.fecha || '';
+      const boleta = r.boleta || '';
+      opt.value = idx;
+      opt.textContent = placa+'  |  Lic: '+lic+'  |  Boleta: '+boleta+'  |  '+fecha;
+      select.appendChild(opt);
+    });
+    if(resultados.length){
+      select.selectedIndex = 0;
+      mostrarDetalle(resultados[0]);
+    }
+  }
+}
+
+function mostrarDetalle(reg){
+  const detalle = document.getElementById('detalle');
+  if(!reg){
+    detalle.style.display = 'none';
+    detalle.innerHTML = '';
+    return;
+  }
+  detalle.style.display = 'block';
+
+  const placa = reg.placa || 'SIN PLACA';
+  const lic = reg.licencia || 'SIN LICENCIA';
+
+  detalle.innerHTML = `
+    <div class="detalle-title">Placa ${placa}</div>
+    <div class="detalle-sub">No. licencia: <span class="highlight">${lic}</span> &middot; Boleta: ${reg.boleta || ''} &middot; Fecha: ${reg.fecha || ''} &middot; Hora: ${reg.hora || ''}</div>
+    <table class="table">
+      <tbody>
+        <tr><th>Serie</th><td>${reg.serie || ''}</td></tr>
+        <tr><th>Tipo</th><td>${reg.tipo || ''}</td></tr>
+        <tr><th>Marca</th><td>${reg.marca || ''}</td></tr>
+        <tr><th>Color</th><td>${reg.color || ''}</td></tr>
+        <tr><th>Direcci&oacute;n</th><td>${reg.direccion || ''}</td></tr>
+        <tr><th>Departamento</th><td>${reg.departamento || ''}</td></tr>
+        <tr><th>Municipio</th><td>${reg.municipio || ''}</td></tr>
+        <tr><th>Conductor</th><td>${reg.conductor || ''}</td></tr>
+        <tr><th>Art&iacute;culo</th><td>${reg.articulo || ''}</td></tr>
+        <tr><th>Descripci&oacute;n</th><td>${reg.descripcion || ''}</td></tr>
+        <tr><th>Chapa</th><td>${reg.chapa || ''}</td></tr>
+      </tbody>
+    </table>
+  `;
+}
+
+document.getElementById('btnBuscar').addEventListener('click', buscar);
+document.getElementById('query').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') buscar();
+});
+document.getElementById('resultadoSelect').addEventListener('change', e=>{
+  const idx = parseInt(e.target.value,10);
+  if(!isNaN(idx) && ultimosResultados[idx]){
+    mostrarDetalle(ultimosResultados[idx]);
+  }
+});
+
+// carga inicial
+cargarDatos();
+</script>
 </body>
 </html>
