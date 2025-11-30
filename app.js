@@ -1,160 +1,98 @@
-// =============================
-//  CONFIGURACIÓN GENERAL
-// =============================
+// ================== CARGA DEL JSON ==================
 let datos = [];
-let resultadosActuales = [];
 
 const estadoEl = document.getElementById("estado");
 const inputEl  = document.getElementById("busquedaInput");
 const btnBuscar = document.getElementById("btnBuscar");
-const resultadoEl = document.getElementById("resultado");
-const similaresBox = document.getElementById("similaresBox");
-const similaresSelect = document.getElementById("similaresSelect");
 
-// =============================
-//  CARGAR JSON
-// =============================
 fetch("placas.json")
-  .then(res => res.json())
-  .then(json => {
-    datos = json;
-    estadoEl.textContent = "Archivo cargado ✔️";
-  })
-  .catch(err => {
-    console.error(err);
-    estadoEl.textContent = "Error cargando información ❌";
-  });
+    .then(res => res.json())
+    .then(json => {
+        datos = json;
+        estadoEl.textContent = "Archivo cargado ✔️";
+    })
+    .catch(() => estadoEl.textContent = "Error cargando archivo ❌");
 
-// =============================
-//  NORMALIZAR TEXTO
-// =============================
+
+// ================== NORMALIZAR ==================
 function normalizar(txt) {
-  return String(txt || "")
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "")
-    .replace(/[-_.]/g, "");
+    return String(txt || "")
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "")
+        .replace(/[-_.]/g, "");
 }
 
-// =============================
-//  ALIAS INTELIGENTES
-// =============================
-const aliases = {
-  placa: ["placa", "placas", "numplaca", "nop", "numeroplaca"],
-  dpi: ["dpi", "documento", "nodocumento"],
-  licencia: ["licencia", "nolicencia", "numlicencia", "lic"],
-  boleta: ["boleta", "noboleta", "numeroboleta"],
-  conductor: ["conductor", "nombre", "nombredelconductor"],
-  direccion: ["direccion", "ubicacion", "dir"],
-  articulo: ["articulo", "faltas", "art"],
-};
 
-// Encontrar columna por alias
-function matchField(key) {
-  const cleanKey = normalizar(key);
-  for (let campo in aliases) {
-    for (let alias of aliases[campo]) {
-      if (cleanKey.includes(normalizar(alias))) return campo;
-    }
-  }
-  return key;
-}
-
-// =============================
-//  BÚSQUEDA ULTRA COMPLETA
-// =============================
+// ================== BUSCAR ==================
 function buscar() {
-  if (datos.length === 0) {
-    alert("Aún no se han cargado los datos.");
-    return;
-  }
+    const q = inputEl.value.trim();
+    if (q.length < 2) {
+        alert("Ingrese mínimo 2 caracteres.");
+        return;
+    }
 
-  const q = inputEl.value.trim();
-  if (q.length < 2) {
-    alert("Ingrese mínimo 2 caracteres.");
-    return;
-  }
+    const qNorm = normalizar(q);
 
-  const qNorm = normalizar(q);
+    const encontrados = datos.filter(row =>
+        Object.values(row).some(col => normalizar(col).includes(qNorm))
+    );
 
-  const resultados = datos.filter(row => {
-    const texto = Object.values(row).join(" ");
-    return normalizar(texto).includes(qNorm);
-  });
-
-  mostrarResultados(resultados);
+    mostrarListaCompacta(encontrados);
 }
 
-// =============================
-//  MOSTRAR RESULTADOS
-// =============================
-function mostrarResultados(lista) {
-  resultadosActuales = lista;
-  resultadoEl.innerHTML = "";
-  similaresSelect.innerHTML = "<option value=''>-- seleccionar --</option>";
-  similaresBox.classList.add("oculto");
 
-  if (lista.length === 0) {
-    resultadoEl.innerHTML = "<div class='nope'>❓ Sin resultados</div>";
-    return;
-  }
+// ================== LISTA COMPACTA ==================
+function mostrarListaCompacta(lista) {
+    const panel = document.getElementById("resultadosLista");
+    const cont = document.getElementById("contenidoResultados");
+    const det = document.getElementById("detalleRegistro");
 
-  if (lista.length === 1) {
-    resultadoEl.innerHTML = generarTarjeta(lista[0]);
-    return;
-  }
+    cont.innerHTML = "";
+    det.style.display = "none";
+    panel.style.display = "none";
 
-  similaresBox.classList.remove("oculto");
+    if (lista.length === 0) {
+        panel.style.display = "block";
+        cont.innerHTML = "<div style='color:red'>❌ Sin resultados</div>";
+        return;
+    }
 
-  lista.forEach((row, idx) => {
-    const placa = row.placa || row.placas || "N/D";
-    const dpi   = row.dpi || row.documento || "";
-    const lic   = row.licencia || row.no_licencia || "";
+    document.getElementById("tituloResultados").textContent =
+        `Resultados encontrados: ${lista.length}`;
 
-    const opcion = [placa, dpi, lic].filter(Boolean).join(" — ");
+    lista.forEach(registro => {
+        const linea = document.createElement("div");
+        linea.classList.add("lineaRegistro");
+        linea.textContent = Object.values(registro).join(" | ");
+        linea.onclick = () => mostrarDetalle(registro);
+        cont.appendChild(linea);
+    });
 
-    const opt = document.createElement("option");
-    opt.value = idx;
-    opt.textContent = opcion || `Registro ${idx + 1}`;
-    similaresSelect.appendChild(opt);
-  });
-
-  resultadoEl.innerHTML = generarTarjeta(lista[0]);
+    panel.style.display = "block";
 }
 
-// =============================
-//  GENERAR TARJETA PROFESIONAL
-// =============================
-function generarTarjeta(row) {
-  const datosLimpios = {};
 
-  // Detectar campos por alias
-  for (let key in row) {
-    const campo = matchField(key);
-    datosLimpios[campo] = row[key];
-  }
+// ================== DETALLE ==================
+function mostrarDetalle(registro) {
+    const panel = document.getElementById("detalleRegistro");
+    panel.innerHTML = "";
 
-  let html = `<div class="tarjeta">`;
+    for (let [key, val] of Object.entries(registro)) {
+        panel.innerHTML += `
+            <div class="detCampo">
+                <b>${key.toUpperCase()}:</b> ${val || "—"}
+            </div>
+        `;
+    }
 
-  for (let campo in datosLimpios) {
-    html += `<div class="campo"><b>${campo.toUpperCase()}:</b> ${datosLimpios[campo]}</div>`;
-  }
-
-  html += `</div>`;
-  return html;
+    panel.style.display = "block";
 }
 
-// =============================
-//  EVENTOS
-// =============================
+
+// ================== EVENTOS ==================
 btnBuscar.addEventListener("click", buscar);
 
 inputEl.addEventListener("keydown", e => {
-  if (e.key === "Enter") buscar();
-});
-
-similaresSelect.addEventListener("change", () => {
-  const idx = similaresSelect.value;
-  if (idx === "") return;
-  resultadoEl.innerHTML = generarTarjeta(resultadosActuales[idx]);
+    if (e.key === "Enter") buscar();
 });
