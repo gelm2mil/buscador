@@ -1,9 +1,9 @@
 let registros = [];
 let columnas = [];
 
-// =======================
+// ============================
 // CARGAR JSON AUTOMÁTICAMENTE
-// =======================
+// ============================
 fetch("placas.json")
     .then(r => r.json())
     .then(data => {
@@ -21,9 +21,10 @@ fetch("placas.json")
 const clean = t =>
     t.toString().replace(/\s+/g, "").replace(/-/g, "").toUpperCase();
 
-// =======================
-// FUNCIÓN PRINCIPAL DE BÚSQUEDA
-// =======================
+
+// ============================
+//    FUNCIÓN PRINCIPAL
+// ============================
 document.getElementById("btnBuscar").addEventListener("click", buscar);
 
 function buscar() {
@@ -31,96 +32,87 @@ function buscar() {
     if (!texto) return;
 
     const limpio = clean(texto);
-    const mayus = texto.toUpperCase();
 
-    const cont = document.getElementById("contenidoResultados");
-    cont.innerHTML = "";
+    const divPrincipal = document.getElementById("resultadoPrincipal");
+    const divSimilares = document.getElementById("similares");
+    divSimilares.innerHTML = "";
 
     let coincidencias = [];
 
-    registros.forEach((reg) => {
-        let prio = 0;
+    registros.forEach(reg => {
+        let prioridad = 0;
 
-        let placa = reg["placas"] || reg["placa"] || "";
-        let licencia = reg["No. Licencia"] || "";
-        let dpi = reg["dpi"] || "";
-        let documento = reg["documento"] || "";
-        let calcom = reg["No. Calcomania"] || "";
+        const placa = (reg.placa || "").toUpperCase();
+        const calco = (reg.calcomania || "").toUpperCase();
+        const dpi = clean(reg.dpi || "");
+        const lic = clean(reg.licencia || "");
+        const doc = clean(reg.documento || "");
 
-        if (clean(placa) === limpio) prio = 100;
-        if (clean(licencia) === limpio) prio = 90;
-        if (clean(dpi) === limpio) prio = 80;
-        if (clean(documento) === limpio) prio = 70;
-        if (clean(calcom) === limpio) prio = 60;
+        if (placa === texto.toUpperCase()) prioridad = 90;
+        if (clean(placa) === limpio) prioridad = 85;
+        if (calco === texto || calco === limpio) prioridad = 95;
+        if (dpi === limpio) prioridad = 80;
+        if (lic === limpio) prioridad = 75;
+        if (doc === limpio) prioridad = 70;
 
-        if (prio > 0) coincidencias.push({ reg, prio });
+        if (prioridad > 0) {
+            coincidencias.push({ reg, prioridad });
+        }
     });
 
     if (coincidencias.length === 0) {
-        cont.innerHTML = `<div class="noExiste">No encontrado: ${texto}</div>`;
+        divPrincipal.innerHTML = `<p>No se encontró <strong>${texto}</strong>.</p>`;
         return;
     }
 
-    coincidencias.sort((a, b) => b.prio - a.prio);
+    coincidencias.sort((a, b) => b.prioridad - a.prioridad);
 
-    coincidencias.forEach(obj => {
-        crearTarjeta(obj.reg);
-    });
-}
+    const principal = coincidencias[0].reg;
+    const otros = coincidencias.slice(1).map(c => c.reg);
 
-// =======================
-// TARJETAS PROFESIONALES
-// =======================
-function crearTarjeta(reg) {
-    const cont = document.getElementById("contenidoResultados");
+    divPrincipal.innerHTML = generarTabla(principal);
 
-    let placa = reg["placas"] || reg["placa"] || "SIN PLACA";
-    let nombre = reg["nombre del conductor"] || "SIN NOMBRE";
-    let fecha = reg["fecha"] || "";
-    let hora = reg["hora"] || "";
-    let tipo = reg["tipo"] || "";
+    if (otros.length > 0) {
+        let options = `<option value="">-- seleccionar --</option>`;
+        otros.forEach((r, i) => {
+            const txt = `${r.calcomania} | ${r.ruta} | ${r.placa}`;
+            options += `<option value="${i}">${txt}</option>`;
+        });
 
-    let card = document.createElement("div");
-    card.className = "tarjeta";
-
-    card.innerHTML = `
-        <div class="tarjetaHead">
-            <span class="placa">${placa}</span>
-            <span class="info">${tipo} — ${fecha} ${hora}</span>
-        </div>
-
-        <div class="detalle" style="display:none;">
-            ${generarDetalle(reg)}
-        </div>
-    `;
-
-    // Abrir/cerrar detalle
-    card.querySelector(".tarjetaHead").addEventListener("click", () => {
-        let d = card.querySelector(".detalle");
-        d.style.display = d.style.display === "none" ? "block" : "none";
-    });
-
-    cont.appendChild(card);
-}
-
-// =======================
-// DETALLE LIMPIO
-// =======================
-function generarDetalle(reg) {
-    let html = `<div class="detalleBox">`;
-
-    columnas.forEach(c => {
-        let valor = reg[c];
-        if (valor === null || valor === "" || c.includes("Unnamed")) return;
-
-        html += `
-            <div class="fila">
-                <span class="campo">${c}:</span>
-                <span class="valor">${valor}</span>
-            </div>
+        divSimilares.innerHTML = `
+            <label>SIMILARES:</label>
+            <select id="selectSimilares">${options}</select>
         `;
-    });
 
-    html += "</div>";
-    return html;
+        document
+            .getElementById("selectSimilares")
+            .addEventListener("change", e => {
+                if (e.target.value === "") return;
+                const index = parseInt(e.target.value);
+                divPrincipal.innerHTML = generarTabla(otros[index]);
+            });
+    }
+}
+
+// ============================
+//  TABLA DETALLE COMPLETO
+// ============================
+
+function generarTabla(r) {
+    return `
+        <table class="tablaDetalle">
+            <tr><th>NO. PLACA</th><td>${r.placa}</td></tr>
+            <tr><th>NO. CALCOMANÍA</th><td>${r.calcomania}</td></tr>
+            <tr><th>PLACA SALE</th><td>${r.placa_sale}</td></tr>
+            <tr><th>CONCESIONARIO</th><td>${r.concesionario}</td></tr>
+            <tr><th>TEL. DUEÑO</th><td>${r.tel_dueno}</td></tr>
+            <tr><th>RUTA</th><td>${r.ruta}</td></tr>
+            <tr><th>TEL. PILOTOS</th><td>${r.tel_pilotos}</td></tr>
+            <tr><th>NOMBRE DEL PILOTO</th><td>${r.nombre_piloto}</td></tr>
+            <tr><th>DPI</th><td>${r.dpi}</td></tr>
+            <tr><th>DOCUMENTO</th><td>${r.documento}</td></tr>
+            <tr><th>LICENCIA</th><td>${r.licencia}</td></tr>
+            <tr><th>TIPO LICENCIA</th><td>${r.tipo_licencia}</td></tr>
+        </table>
+    `;
 }
