@@ -2,13 +2,13 @@ let BD = [];
 const estado = document.getElementById("estado");
 const input = document.getElementById("busquedaInput");
 const btnBuscar = document.getElementById("btnBuscar");
-const listaResultados = document.getElementById("contenidoResultados");
+const listaResultados = document.getElementById("resultadosLista");
 const detalle = document.getElementById("detalleRegistro");
 
 // Cargar JSON
 async function cargarJSON() {
     try {
-        const resp = await fetch("placas.json?nocache=" + Date.now());
+        const resp = await fetch("placas.json?noCache=" + Date.now());
         BD = await resp.json();
 
         estado.textContent = `Archivo cargado. Registros: ${BD.length}`;
@@ -22,12 +22,12 @@ async function cargarJSON() {
 
 cargarJSON();
 
-// Normalizar texto para búsquedas
+// Normalización
 function normalizar(txt) {
     return txt.toString().toLowerCase().replace(/\s|-/g, "");
 }
 
-// Buscar registros
+// Buscar
 function buscar() {
     const q = normalizar(input.value);
     listaResultados.innerHTML = "";
@@ -35,51 +35,43 @@ function buscar() {
 
     if (q.length < 2) return;
 
-    const resultados = BD.filter(reg => {
-        return Object.values(reg).some(v =>
-            normalizar(v ?? "").includes(q)
-        );
-    });
+    const resultados = BD.filter(reg =>
+        Object.values(reg).some(v => normalizar(v ?? "").includes(q))
+    );
 
     if (resultados.length === 0) {
         listaResultados.innerHTML = `<div class="itemResultado">Sin resultados…</div>`;
         return;
     }
 
-    resultados.forEach((reg, i) => {
+    resultados.forEach(reg => {
         const div = document.createElement("div");
         div.className = "itemResultado";
-        div.innerHTML = `
-            <b>${reg["placas"] ?? reg["NO. PLACA"] ?? "SIN PLACA"}</b>
-            — ${reg["nombre del conductor"] || "SIN NOMBRE"}
-        `;
+
+        const placa = reg["placas"] || reg["NO. PLACA"] || "SIN PLACA";
+        const nombre = reg["nombre del conductor"] || "SIN NOMBRE";
+
+        div.innerHTML = `<b>${placa}</b> — ${nombre}`;
         div.onclick = () => mostrarDetalle(reg);
+
         listaResultados.appendChild(div);
     });
 }
 
-// Mostrar detalle expandido
+// Mostrar tarjeta detalle
 function mostrarDetalle(reg) {
     detalle.innerHTML = `
         <div class="tarjetaDetalle">
-            <h3>Detalle completo</h3>
+            <h3 style="color:#00eaff;text-shadow:0 0 8px #00eaff">DETALLE COMPLETO</h3>
             <hr>
-            ${Object.entries(reg)
-                .map(([k, v]) => `
-                    <div class="fila">
-                        <span class="campo">${k}:</span>
-                        <span class="valor">${v}</span>
-                    </div>
-                `)
-                .join("")}
+            ${Object.entries(reg).map(([k, v]) =>
+                `<div class="fila"><span class="campo">${k}:</span><span class="valor">${v}</span></div>`
+            ).join("")}
         </div>
     `;
 
     detalle.scrollIntoView({ behavior: "smooth" });
 }
 
-// Eventos
 btnBuscar.onclick = buscar;
-input.addEventListener("keyup", e => {
-    if (e.key === "Enter") buscar();
-});
+input.addEventListener("keyup", e => { if (e.key === "Enter") buscar(); });
