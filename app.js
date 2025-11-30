@@ -1,5 +1,5 @@
 // =============================
-//  CARGA DEL JSON
+//  CONFIGURACIÓN GENERAL
 // =============================
 let datos = [];
 let resultadosActuales = [];
@@ -11,6 +11,9 @@ const resultadoEl = document.getElementById("resultado");
 const similaresBox = document.getElementById("similaresBox");
 const similaresSelect = document.getElementById("similaresSelect");
 
+// =============================
+//  CARGAR JSON
+// =============================
 fetch("placas.json")
   .then(res => res.json())
   .then(json => {
@@ -22,7 +25,9 @@ fetch("placas.json")
     estadoEl.textContent = "Error cargando información ❌";
   });
 
-// Normalizador
+// =============================
+//  NORMALIZAR TEXTO
+// =============================
 function normalizar(txt) {
   return String(txt || "")
     .toLowerCase()
@@ -32,55 +37,56 @@ function normalizar(txt) {
 }
 
 // =============================
-// ALIAS INTELIGENTES
+//  ALIAS INTELIGENTES
 // =============================
-const alias = {
-  placa: ["placa", "placas"],
-  piloto: ["piloto", "conductor", "nombre"],
-  concesionario: ["concesionario", "propietario", "dueño", "dueno"],
-  telefono: ["telefono", "tel"],
-  dpi: ["dpi", "documento"],
-  licencia: ["licencia"],
-  boleta: ["boleta"],
-  tipo: ["tipo", "clase"],
-  marca: ["marca"],
-  color: ["color"],
-  serie: ["serie"],
-  ruta: ["ruta", "zona", "direccion", "ubicacion"]
+const aliases = {
+  placa: ["placa", "placas", "numplaca", "nop", "numeroplaca"],
+  dpi: ["dpi", "documento", "nodocumento"],
+  licencia: ["licencia", "nolicencia", "numlicencia", "lic"],
+  boleta: ["boleta", "noboleta", "numeroboleta"],
+  conductor: ["conductor", "nombre", "nombredelconductor"],
+  direccion: ["direccion", "ubicacion", "dir"],
+  articulo: ["articulo", "faltas", "art"],
 };
 
-function limpiarClave(t) {
-  return t.toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-function detectarCampo(key) {
-  const limpio = limpiarClave(key);
-  for (let campo in alias) {
-    for (let a of alias[campo]) {
-      if (limpio.includes(limpiarClave(a))) return campo;
+// Encontrar columna por alias
+function matchField(key) {
+  const cleanKey = normalizar(key);
+  for (let campo in aliases) {
+    for (let alias of aliases[campo]) {
+      if (cleanKey.includes(normalizar(alias))) return campo;
     }
   }
-  return null;
+  return key;
 }
 
 // =============================
-// BÚSQUEDA
+//  BÚSQUEDA ULTRA COMPLETA
 // =============================
 function buscar() {
-  if (!datos.length) return alert("Esperando datos…");
-  
-  const q = normalizar(inputEl.value.trim());
-  if (q.length < 2) return alert("Mínimo 2 caracteres");
+  if (datos.length === 0) {
+    alert("Aún no se han cargado los datos.");
+    return;
+  }
 
-  const encontrados = datos.filter(row =>
-    normalizar(Object.values(row).join(" ")).includes(q)
-  );
+  const q = inputEl.value.trim();
+  if (q.length < 2) {
+    alert("Ingrese mínimo 2 caracteres.");
+    return;
+  }
 
-  mostrarResultados(encontrados);
+  const qNorm = normalizar(q);
+
+  const resultados = datos.filter(row => {
+    const texto = Object.values(row).join(" ");
+    return normalizar(texto).includes(qNorm);
+  });
+
+  mostrarResultados(resultados);
 }
 
 // =============================
-// MOSTRAR RESULTADOS
+//  MOSTRAR RESULTADOS
 // =============================
 function mostrarResultados(lista) {
   resultadosActuales = lista;
@@ -89,67 +95,66 @@ function mostrarResultados(lista) {
   similaresBox.classList.add("oculto");
 
   if (lista.length === 0) {
-    resultadoEl.innerHTML = `<div class="nope">❌ Sin resultados</div>`;
+    resultadoEl.innerHTML = "<div class='nope'>❓ Sin resultados</div>";
     return;
   }
 
-  if (lista.length > 1) {
-    similaresBox.classList.remove("oculto");
-    lista.forEach((r, i) => {
-      const placa = r.placa || r.placas || "N/D";
-      const piloto = r.piloto || r.conductor || "";
-      const opt = document.createElement("option");
-      opt.value = i;
-      opt.textContent = `${placa} — ${piloto}`;
-      similaresSelect.appendChild(opt);
-    });
+  if (lista.length === 1) {
+    resultadoEl.innerHTML = generarTarjeta(lista[0]);
+    return;
   }
+
+  similaresBox.classList.remove("oculto");
+
+  lista.forEach((row, idx) => {
+    const placa = row.placa || row.placas || "N/D";
+    const dpi   = row.dpi || row.documento || "";
+    const lic   = row.licencia || row.no_licencia || "";
+
+    const opcion = [placa, dpi, lic].filter(Boolean).join(" — ");
+
+    const opt = document.createElement("option");
+    opt.value = idx;
+    opt.textContent = opcion || `Registro ${idx + 1}`;
+    similaresSelect.appendChild(opt);
+  });
 
   resultadoEl.innerHTML = generarTarjeta(lista[0]);
 }
 
-// ================== GENERAR TABLA PROFESIONAL ==================
-function generarTarjeta(r) {
-  let html = `
-    <table class="tabla-resultados">
-      <thead>
-        <tr><th>CAMPO</th><th>VALOR</th></tr>
-      </thead>
-      <tbody>
-  `;
+// =============================
+//  GENERAR TARJETA PROFESIONAL
+// =============================
+function generarTarjeta(row) {
+  const datosLimpios = {};
 
-  for (let key in r) {
-    const limpioKey = key
-      .replace(/_/g, " ")
-      .replace(/unnamed/i, "Dato")
-      .toUpperCase();
-
-    let value = r[key];
-    if (value === null || value === "" || value === undefined) {
-      value = "—";
-    }
-
-    html += `
-      <tr>
-        <td class="campo-titulo">${limpioKey}</td>
-        <td class="campo-valor">${value}</td>
-      </tr>
-    `;
+  // Detectar campos por alias
+  for (let key in row) {
+    const campo = matchField(key);
+    datosLimpios[campo] = row[key];
   }
 
-  html += `
-      </tbody>
-    </table>
-  `;
+  let html = `<div class="tarjeta">`;
 
+  for (let campo in datosLimpios) {
+    html += `<div class="campo"><b>${campo.toUpperCase()}:</b> ${datosLimpios[campo]}</div>`;
+  }
+
+  html += `</div>`;
   return html;
 }
 
-
-// Eventos
+// =============================
+//  EVENTOS
+// =============================
 btnBuscar.addEventListener("click", buscar);
-inputEl.addEventListener("keydown", e => { if (e.key === "Enter") buscar(); });
-similaresSelect.addEventListener("change", () => {
-  resultadoEl.innerHTML = generarTarjeta(resultadosActuales[similaresSelect.value]);
+
+inputEl.addEventListener("keydown", e => {
+  if (e.key === "Enter") buscar();
 });
 
+similaresSelect.addEventListener("change", () => {
+  const idx = similaresSelect.value;
+  if (idx === "") return;
+  resultadoEl.innerHTML = generarTarjeta(resultadosActuales[idx]);
+});
