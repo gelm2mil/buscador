@@ -1,53 +1,83 @@
-/* PANEL DE RESULTADOS */
-#resultadosLista {
+body {
+    background: #0a0015;
+    font-family: Arial;
+    color: white;
+    text-align: center;
+}
+
+.contenedor {
     width: 90%;
-    max-height: 280px;
-    margin: 12px auto;
-    background: rgba(0,0,0,0.80);
-    border: 2px solid #00eaff;
+    margin: auto;
+    margin-top: 20px;
+}
+
+.logo {
+    width: 120px;
+}
+
+.estado {
+    margin: 10px;
+    color: #55ff99;
+    font-weight: bold;
+}
+
+.buscadorBox {
+    margin-top: 15px;
+}
+
+#busquedaInput {
+    width: 65%;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+#btnBuscar {
+    padding: 10px 20px;
+    background: cyan;
+    color: black;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* PANEL LISTA COMPACTA */
+#resultadosLista {
+    width: 95%;
+    max-height: 260px;
+    margin: 20px auto;
+    background: rgba(0,0,0,0.8);
+    border: 2px solid cyan;
     border-radius: 12px;
     padding: 10px;
     overflow-y: auto;
-    color: #00f7ff;
-    font-family: Consolas, monospace;
     display: none;
-    box-shadow: 0 0 15px #00eaff;
+    box-shadow: 0 0 15px cyan;
 }
 
-/* LINEA DE RESULTADO */
 .lineaRegistro {
-    padding: 7px 10px;
+    padding: 7px;
     border-bottom: 1px solid #00eaff55;
     cursor: pointer;
-    transition: 0.15s;
+    transition: 0.2s;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .lineaRegistro:hover {
-    background: #00eaff22;
+    background: rgba(0,255,255,0.2);
 }
 
-/* TITULO RESULTADOS */
-#tituloResultados {
-    text-align: center;
-    color: #00f7ff;
-    margin-bottom: 8px;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-/* TARJETA DETALLADA */
+/* DETALLE */
 #detalleRegistro {
-    width: 90%;
-    margin: 10px auto;
+    width: 95%;
+    margin: 20px auto;
     background: rgba(0,0,0,0.9);
     border: 2px solid #00ff99;
     border-radius: 12px;
     padding: 15px;
-    color: #00ffcc;
     display: none;
+    text-align: left;
     box-shadow: 0 0 20px #00ff99;
 }
 
@@ -58,4 +88,10 @@
 
 .detCampo b {
     color: #00ffcc;
+}
+
+.footer {
+    margin-top: 40px;
+    font-size: 13px;
+    color: cyan;
 }
