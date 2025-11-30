@@ -1,136 +1,98 @@
-/* ===========================
-   CARGA DEL JSON COMPLETO
-=========================== */
 let registros = [];
-let resultados = [];
 
-// Normalizador avanzado
-function normalizar(txt) {
-    return String(txt || "")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/\s+/g, "")
-        .replace(/[-_.]/g, "");
+async function cargarJSON() {
+    try {
+        const res = await fetch("placas.json");
+        registros = await res.json();
+
+        document.getElementById("estado").innerText =
+            "Archivo cargado ✓ Registros: " + registros.length;
+
+    } catch (e) {
+        console.error(e);
+        document.getElementById("estado").innerText = "Error cargando JSON";
+    }
 }
+cargarJSON();
 
-// Escape HTML
-function esc(t) {
-    return String(t || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-}
+// Limpieza
+const clean = t =>
+    t.toString().replace(/\s+/g, "").replace(/-/g, "").toUpperCase();
 
-// Cargar JSON
-fetch("placas.json")
-    .then(r => r.json())
-    .then(json => {
-        registros = json;
-        document.getElementById("estado").textContent =
-            `Archivo cargado ✔ Registros: ${json.length}`;
-    })
-    .catch(err => {
-        console.error(err);
-        document.getElementById("estado").textContent =
-            "Error cargando placas.json ❌";
-    });
-
-/* ===========================
-   BUSCADOR PRINCIPAL
-=========================== */
+// Buscar
 document.getElementById("btnBuscar").addEventListener("click", buscar);
-document.getElementById("busquedaInput").addEventListener("keydown", e => {
-    if (e.key === "Enter") buscar();
-});
 
 function buscar() {
-    const q = document.getElementById("busquedaInput").value.trim();
-    const qNorm = normalizar(q);
+    const txt = document.getElementById("busquedaInput").value.trim();
+    const limpio = clean(txt);
 
-    if (qNorm.length < 2) {
-        alert("Ingrese mínimo 2 caracteres");
-        return;
-    }
-
-    resultados = [];
-
-    registros.forEach(reg => {
-        const filaCompleta = Object.values(reg).join(" ");
-        const filaNorm = normalizar(filaCompleta);
-
-        if (filaNorm.includes(qNorm)) {
-            resultados.push(reg);
-        }
-    });
-
-    mostrarResultadosCompactos();
-}
-
-/* ===========================
-   LISTA COMPACTA PMT–FULL
-=========================== */
-function mostrarResultadosCompactos() {
-    const cont = document.getElementById("resultadosLista");
+    const lista = document.getElementById("resultadosLista");
     const detalle = document.getElementById("detalleRegistro");
 
-    cont.innerHTML = "";
+    lista.innerHTML = "";
     detalle.innerHTML = "";
 
-    if (resultados.length === 0) {
-        cont.innerHTML = `<div class="nope">❌ No se encontraron resultados.</div>`;
+    if (!txt) return;
+
+    const encontrados = registros.filter(r =>
+        clean(r.placas) === limpio ||
+        clean(r["No. Licencia"]) === limpio ||
+        clean(r.lic) === limpio ||
+        clean(r.documento || "") === limpio
+    );
+
+    if (encontrados.length === 0) {
+        lista.innerHTML = `<div class="noResult">Sin resultados para: ${txt}</div>`;
         return;
     }
 
-    resultados.forEach((reg, index) => {
-        const placa = reg["placas"] || reg["placa"] || "SIN PLACA";
-        const boleta = reg["No. Boleta"] || "—";
-        const fecha = reg["fecha"] || "—";
-        const art = reg["articulo"] || reg["Articulo"] || "—";
+    encontrados.forEach((r, idx) => {
+        const div = document.createElement("div");
+        div.className = "itemResultado";
 
-        const item = document.createElement("div");
-        item.className = "itemCompacto";
-        item.innerHTML = `
-            <div class="item-placa">${esc(placa)}</div>
-            <div class="item-info">
-                <span>Boleta: ${esc(boleta)}</span> -
-                <span>Fecha: ${esc(fecha)}</span> -
-                <span>Art: ${esc(art)}</span>
+        div.innerHTML = `
+            <div class="resPlaca">${r.placas}</div>
+            <div class="resMini">
+                Boleta: ${r["No. Boleta"]} — Art: ${r.articulo}
             </div>
+            <button class="btnVer" onclick="mostrarDetalle(${idx})">Ver detalle</button>
         `;
 
-        item.addEventListener("click", () => mostrarDetalle(reg));
-
-        cont.appendChild(item);
+        lista.appendChild(div);
     });
+
+    // Guardamos para acceder por índice
+    window._cacheResultados = encontrados;
 }
 
-/* ===========================
-   DETALLE COMPLETO TIPO PMT
-=========================== */
-function mostrarDetalle(r) {
-    const d = document.getElementById("detalleRegistro");
+function mostrarDetalle(i) {
+    const r = window._cacheResultados[i];
+    if (!r) return;
 
-    d.innerHTML = "";
+    const detalle = document.getElementById("detalleRegistro");
 
-    let html = `
-    <div class="detalleTitulo">
-        DETALLE DEL REGISTRO
-    </div>
-    <table class="tablaDetalle">
+    detalle.innerHTML = `
+        <h3 class="detalleTitulo">DETALLE COMPLETO</h3>
+        <div class="detalleCaja">
+
+            <p><b>Placa:</b> ${r.placas}</p>
+            <p><b>No. Boleta:</b> ${r["No. Boleta"]}</p>
+            <p><b>Fecha:</b> ${r.fecha}</p>
+            <p><b>Hora:</b> ${r.hora}</p>
+            <p><b>Tipo:</b> ${r.tipo}</p>
+            <p><b>Marca:</b> ${r.marca}</p>
+            <p><b>Color:</b> ${r.color}</p>
+            <p><b>Dirección:</b> ${r.direccion}</p>
+            <p><b>Departamento:</b> ${r.departamento}</p>
+            <p><b>Municipio:</b> ${r.Municipio}</p>
+            <p><b>Conductor:</b> ${r["nombre del conductor"]}</p>
+            <p><b>Licencia:</b> ${r.lic} — ${r["No. Licencia"]}</p>
+            <p><b>Artículo:</b> ${r.articulo}</p>
+            <p><b>Descripción:</b> ${r.descripcion}</p>
+            <p><b>Chapa:</b> ${r.chapa}</p>
+
+        </div>
     `;
 
-    for (let k in r) {
-        html += `
-        <tr>
-            <th>${esc(k)}</th>
-            <td>${esc(r[k])}</td>
-        </tr>
-        `;
-    }
-
-    html += `</table>`;
-
-    d.innerHTML = html;
+    detalle.scrollIntoView({ behavior: "smooth" });
 }
