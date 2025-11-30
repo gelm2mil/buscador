@@ -1,5 +1,8 @@
 name: Convert Excel to JSON
 
+permissions:
+  contents: write
+
 on:
   push:
     paths:
@@ -33,5 +36,5 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           git add placas.json
-          git commit -m "Auto-update placas.json"
+          git commit -m "Auto-update placas.json" || echo "No changes"
           git push
