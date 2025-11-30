@@ -108,48 +108,43 @@ function mostrarResultados(lista) {
   resultadoEl.innerHTML = generarTarjeta(lista[0]);
 }
 
-// =============================
-// TARJETA COMPLETA PROFESIONAL
-// =============================
-function generarTarjeta(row) {
-  let ordenados = {};
-  let otros = {};
+// ================== GENERAR TABLA PROFESIONAL ==================
+function generarTarjeta(r) {
+  let html = `
+    <table class="tabla-resultados">
+      <thead>
+        <tr><th>CAMPO</th><th>VALOR</th></tr>
+      </thead>
+      <tbody>
+  `;
 
-  for (let key in row) {
-    const valor = row[key];
-    if (valor === null || valor === "" || valor === "null") continue;
+  for (let key in r) {
+    const limpioKey = key
+      .replace(/_/g, " ")
+      .replace(/unnamed/i, "Dato")
+      .toUpperCase();
 
-    let campo = detectarCampo(key);
-    if (campo) ordenados[campo] = valor;
-    else otros[key] = valor;
-  }
-
-  let html = `<div class="tarjeta">`;
-
-  // Primero campos importantes
-  const ordenImportante = [
-    "placa","piloto","concesionario","telefono",
-    "dpi","licencia","boleta","tipo",
-    "marca","color","serie","ruta"
-  ];
-
-  ordenImportante.forEach(c => {
-    if (ordenados[c]) {
-      html += `<div class="campo"><b>${c.toUpperCase()}:</b> ${ordenados[c]}</div>`;
+    let value = r[key];
+    if (value === null || value === "" || value === undefined) {
+      value = "—";
     }
-  });
 
-  // Después TODO lo que no tiene alias
-  html += `<hr style="border:1px solid #0ff3; margin:10px 0;">`;
-  html += `<div class="campo" style="opacity:.7;">Datos adicionales</div>`;
-
-  for (let key in otros) {
-    html += `<div class="campo"><b>${key}:</b> ${otros[key]}</div>`;
+    html += `
+      <tr>
+        <td class="campo-titulo">${limpioKey}</td>
+        <td class="campo-valor">${value}</td>
+      </tr>
+    `;
   }
 
-  html += `</div>`;
+  html += `
+      </tbody>
+    </table>
+  `;
+
   return html;
 }
+
 
 // Eventos
 btnBuscar.addEventListener("click", buscar);
@@ -157,3 +152,4 @@ inputEl.addEventListener("keydown", e => { if (e.key === "Enter") buscar(); });
 similaresSelect.addEventListener("change", () => {
   resultadoEl.innerHTML = generarTarjeta(resultadosActuales[similaresSelect.value]);
 });
+
