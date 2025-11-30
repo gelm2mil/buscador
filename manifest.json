@@ -1,20 +1,11 @@
-{
-  "name": "GELM — Sistema PMT 2026",
-  "short_name": "PMT 2026",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#00eaff",
-  "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}
+let datos = [];
+
+fetch("placas.json")
+    .then(res => res.json())
+    .then(json => {
+        datos = json;
+        document.getElementById("estado").textContent = "Archivo cargado ✔️";
+    })
+    .catch(() => {
+        document.getElementById("estado").textContent = "Error cargando información ❌";
+    });
