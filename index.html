@@ -2,11 +2,16 @@
 <html lang="es">
 <head>
   <!-- PWA -->
-  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#00eaff">
+
   <script>
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js");
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+          .then(() => console.log("SW registrado"))
+          .catch(err => console.error("Error SW:", err));
+      });
     }
   </script>
 
@@ -29,45 +34,38 @@
 
   <div class="grid-menu">
 
-    <!-- AGENDA -->
     <div class="card" onclick="location.href='agen2026.html'">
       <span class="icon">📘</span>
       <span class="label">Agenda 2026</span>
     </div>
 
-    <!-- OPERATIVOS -->
     <div class="card disabled">
       <span class="icon">🚨</span>
       <span class="label">Operativos</span>
       <span class="mini">Próximamente</span>
     </div>
 
-    <!-- DENUNCIAS -->
     <div class="card disabled">
       <span class="icon">📝</span>
       <span class="label">Denuncias</span>
       <span class="mini">En desarrollo</span>
     </div>
 
-    <!-- BUSCADOR DE PLACAS -->
     <div class="card" onclick="location.href='https://gelm2mil.github.io/gelm/'">
       <span class="icon">🔎</span>
       <span class="label">Buscar placas / DPI</span>
     </div>
 
-    <!-- RESPALDOS -->
     <div class="card disabled">
       <span class="icon">📦</span>
       <span class="label">Respaldos</span>
     </div>
 
-    <!-- REPORTES -->
     <div class="card disabled">
       <span class="icon">📊</span>
       <span class="label">Reportes</span>
     </div>
 
-    <!-- CONFIGURACIÓN -->
     <div class="card disabled">
       <span class="icon">⚙</span>
       <span class="label">Configuración</span>
