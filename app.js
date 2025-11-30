@@ -11,7 +11,6 @@ const resultadoEl = document.getElementById("resultado");
 const similaresBox = document.getElementById("similaresBox");
 const similaresSelect = document.getElementById("similaresSelect");
 
-// ====== Cargar JSON ======
 fetch("placas.json")
   .then(res => res.json())
   .then(json => {
@@ -23,9 +22,7 @@ fetch("placas.json")
     estadoEl.textContent = "Error cargando información ❌";
   });
 
-// =============================
-//  NORMALIZADOR
-// =============================
+// Normalizador
 function normalizar(txt) {
   return String(txt || "")
     .toLowerCase()
@@ -35,61 +32,49 @@ function normalizar(txt) {
 }
 
 // =============================
-//  ALIAS INTELIGENTES
+// ALIAS INTELIGENTES
 // =============================
-const aliasProfesionales = {
-  placa: ["placa", "placas", "no placa", "numplaca", "noplaca"],
-  piloto: ["piloto", "conductor", "nombre", "nombrecompleto"],
+const alias = {
+  placa: ["placa", "placas"],
+  piloto: ["piloto", "conductor", "nombre"],
   concesionario: ["concesionario", "propietario", "dueño", "dueno"],
-  telefono: ["telefono", "tel", "numtelefono"],
+  telefono: ["telefono", "tel"],
   dpi: ["dpi", "documento"],
-  licencia: ["licencia", "nolicencia"],
-  boleta: ["boleta", "noboleta"],
-  articulo: ["articulo", "faltas"],
+  licencia: ["licencia"],
+  boleta: ["boleta"],
   tipo: ["tipo", "clase"],
   marca: ["marca"],
   color: ["color"],
-  ruta: ["ruta", "zona", "sector"],
-  direccion: ["direccion", "ubicacion", "dir"],
   serie: ["serie"],
+  ruta: ["ruta", "zona", "direccion", "ubicacion"]
 };
 
-// ====== Detectar campo según alias ======
-function matchField(key) {
-  const clean = normalizacionClave(key);
-  for (let campo in aliasProfesionales) {
-    for (let a of aliasProfesionales[campo]) {
-      if (clean.includes(normalizacionClave(a))) return campo;
+function limpiarClave(t) {
+  return t.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function detectarCampo(key) {
+  const limpio = limpiarClave(key);
+  for (let campo in alias) {
+    for (let a of alias[campo]) {
+      if (limpio.includes(limpiarClave(a))) return campo;
     }
   }
   return null;
-}
-
-function normalizacionClave(t) {
-  return t.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 // =============================
 // BÚSQUEDA
 // =============================
 function buscar() {
-  if (datos.length === 0) {
-    alert("Aún no se han cargado los datos.");
-    return;
-  }
+  if (!datos.length) return alert("Esperando datos…");
+  
+  const q = normalizar(inputEl.value.trim());
+  if (q.length < 2) return alert("Mínimo 2 caracteres");
 
-  const q = inputEl.value.trim();
-  if (q.length < 2) {
-    alert("Ingrese mínimo 2 caracteres.");
-    return;
-  }
-
-  const qNorm = normalizar(q);
-
-  const encontrados = datos.filter(row => {
-    const texto = Object.values(row).join(" ");
-    return normalizar(texto).includes(qNorm);
-  });
+  const encontrados = datos.filter(row =>
+    normalizar(Object.values(row).join(" ")).includes(q)
+  );
 
   mostrarResultados(encontrados);
 }
@@ -104,72 +89,71 @@ function mostrarResultados(lista) {
   similaresBox.classList.add("oculto");
 
   if (lista.length === 0) {
-    resultadoEl.innerHTML = "<div class='nope'>❓ Sin resultados</div>";
+    resultadoEl.innerHTML = `<div class="nope">❌ Sin resultados</div>`;
     return;
   }
 
-  if (lista.length === 1) {
-    resultadoEl.innerHTML = generarTarjetaProfesional(lista[0]);
-    return;
+  if (lista.length > 1) {
+    similaresBox.classList.remove("oculto");
+    lista.forEach((r, i) => {
+      const placa = r.placa || r.placas || "N/D";
+      const piloto = r.piloto || r.conductor || "";
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = `${placa} — ${piloto}`;
+      similaresSelect.appendChild(opt);
+    });
   }
 
-  similaresBox.classList.remove("oculto");
-
-  lista.forEach((r, i) => {
-    const placa = r.placa || r.placas || "N/D";
-    const dpi = r.dpi || r.documento || "";
-    const pil = r.piloto || "";
-
-    const texto = [placa, dpi, pil].filter(Boolean).join(" — ");
-
-    const opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = texto;
-    similaresSelect.appendChild(opt);
-  });
-
-  resultadoEl.innerHTML = generarTarjetaProfesional(lista[0]);
+  resultadoEl.innerHTML = generarTarjeta(lista[0]);
 }
 
 // =============================
-// TARJETA ESTILO PMT PROFESIONAL
+// TARJETA COMPLETA PROFESIONAL
 // =============================
-function generarTarjetaProfesional(row) {
-  const limpio = {};
+function generarTarjeta(row) {
+  let ordenados = {};
+  let otros = {};
 
-  // Convertir claves usando alias
   for (let key in row) {
-    const campo = matchField(key);
-    if (campo) limpio[campo] = row[key];
+    const valor = row[key];
+    if (valor === null || valor === "" || valor === "null") continue;
+
+    let campo = detectarCampo(key);
+    if (campo) ordenados[campo] = valor;
+    else otros[key] = valor;
   }
 
-  // FORMATO DE TARJETA VISUAL
   let html = `<div class="tarjeta">`;
 
-  const orden = [
-    "placa", "piloto", "concesionario", "telefono",
-    "dpi", "licencia", "boleta", "articulo",
-    "tipo", "marca", "color", "serie", "ruta", "direccion"
+  // Primero campos importantes
+  const ordenImportante = [
+    "placa","piloto","concesionario","telefono",
+    "dpi","licencia","boleta","tipo",
+    "marca","color","serie","ruta"
   ];
 
-  orden.forEach(campo => {
-    if (limpio[campo]) {
-      html += `<div class="campo"><b>${campo.toUpperCase()}:</b> ${limpio[campo]}</div>`;
+  ordenImportante.forEach(c => {
+    if (ordenados[c]) {
+      html += `<div class="campo"><b>${c.toUpperCase()}:</b> ${ordenados[c]}</div>`;
     }
   });
+
+  // Después TODO lo que no tiene alias
+  html += `<hr style="border:1px solid #0ff3; margin:10px 0;">`;
+  html += `<div class="campo" style="opacity:.7;">Datos adicionales</div>`;
+
+  for (let key in otros) {
+    html += `<div class="campo"><b>${key}:</b> ${otros[key]}</div>`;
+  }
 
   html += `</div>`;
   return html;
 }
 
-// =============================
-// EVENTOS
-// =============================
+// Eventos
 btnBuscar.addEventListener("click", buscar);
 inputEl.addEventListener("keydown", e => { if (e.key === "Enter") buscar(); });
-
 similaresSelect.addEventListener("change", () => {
-  const idx = similaresSelect.value;
-  if (idx === "") return;
-  resultadoEl.innerHTML = generarTarjetaProfesional(resultadosActuales[idx]);
+  resultadoEl.innerHTML = generarTarjeta(resultadosActuales[similaresSelect.value]);
 });
