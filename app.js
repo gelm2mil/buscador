@@ -1,174 +1,152 @@
-/* ============================================================
-   AGENDA 2026 PRO — LÓGICA COMPLETA
-   By GELM
-   ============================================================ */
+// ================== CARGA DEL JSON ==================
+let datos = [];
+let resultadosActuales = [];
 
-const fechaInput   = document.getElementById("fecha");
-const categoriaSel = document.getElementById("categoria");
-const servicioSel  = document.getElementById("servicio");
-const lugarInput   = document.getElementById("lugar");
-const detalleInput = document.getElementById("detalle");
+const estadoEl = document.getElementById("estado");
+const inputEl  = document.getElementById("busquedaInput");
+const btnBuscar = document.getElementById("btnBuscar");
+const resultadoEl = document.getElementById("resultado");
+const similaresBox = document.getElementById("similaresBox");
+const similaresSelect = document.getElementById("similaresSelect");
+const pieFecha = document.getElementById("pie-fecha");
 
-const verMes       = document.getElementById("verMes");
-const tablaBody    = document.querySelector("#tablaAgenda tbody");
-const estado       = document.getElementById("estado");
-
-const btnAgregar   = document.getElementById("btnAgregar");
-const btnExcel     = document.getElementById("btnExcel");
-const btnBorrar    = document.getElementById("btnBorrarTodo");
-
-/* ============================================
-   NOMBRE DEL STORAGE
-   ============================================ */
-const STORAGE = "agenda2026_pro";
-
-/* ============================================
-   LEER STORAGE
-   ============================================ */
-function cargarAgenda() {
-  const data = localStorage.getItem(STORAGE);
-  return data ? JSON.parse(data) : [];
+// Fecha en el pie
+if (pieFecha) {
+  const f = new Date();
+  pieFecha.textContent = f.toLocaleString("es-GT");
 }
 
-/* ============================================
-   GUARDAR STORAGE
-   ============================================ */
-function guardarAgenda(lista) {
-  localStorage.setItem(STORAGE, JSON.stringify(lista));
-}
-
-/* ============================================
-   AGREGAR ACTIVIDAD
-   ============================================ */
-btnAgregar.onclick = () => {
-
-  if (!fechaInput.value) return mostrar("⚠️ Debes elegir una fecha.");
-  if (!categoriaSel.value) return mostrar("⚠️ La categoría es obligatoria.");
-  if (!detalleInput.value.trim()) return mostrar("⚠️ El detalle no puede estar vacío.");
-
-  let actividades = cargarAgenda();
-
-  const nueva = {
-    fecha: fechaInput.value,
-    categoria: categoriaSel.value,
-    servicio: servicioSel.value,
-    lugar: lugarInput.value.trim(),
-    detalle: detalleInput.value.trim()
-  };
-
-  actividades.push(nueva);
-
-  /* ORDENAR autom. por fecha */
-  actividades.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-
-  guardarAgenda(actividades);
-  mostrar("✔ Actividad agregada");
-
-  limpiarFormulario();
-  mostrarTabla();
-};
-
-/* ============================================
-   BORRAR TODO AÑO
-   ============================================ */
-btnBorrar.onclick = () => {
-  if (confirm("¿Seguro que deseas borrar TODA la agenda 2026?")) {
-    localStorage.removeItem(STORAGE);
-    mostrarTabla();
-    mostrar("🗑 Agenda borrada.");
-  }
-};
-
-/* ============================================
-   EXPORTAR EXCEL
-   ============================================ */
-btnExcel.onclick = () => {
-  let actividades = cargarAgenda();
-  if (actividades.length === 0) return mostrar("⚠️ No hay datos para exportar.");
-
-  const ws = XLSX.utils.json_to_sheet(actividades);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Agenda2026");
-
-  XLSX.writeFile(wb, "AGENDA_TRANSPORTES_2026.xlsx");
-
-  mostrar("📄 Archivo Excel generado");
-};
-
-/* ============================================
-   LIMPIAR FORMULARIO
-   ============================================ */
-function limpiarFormulario() {
-  fechaInput.value = "";
-  categoriaSel.value = "Operativo";
-  servicioSel.value = "(Opcional)";
-  lugarInput.value = "";
-  detalleInput.value = "";
-}
-
-/* ============================================
-   MOSTRAR ESTADO (animado)
-   ============================================ */
-function mostrar(txt) {
-  estado.textContent = txt;
-  estado.style.opacity = "1";
-  setTimeout(() => estado.style.opacity = "0.3", 2500);
-}
-
-/* ============================================
-   MOSTRAR TABLA POR MES
-   ============================================ */
-function mostrarTabla() {
-  tablaBody.innerHTML = "";
-
-  const actividades = cargarAgenda();
-  const mesFiltro = parseInt(verMes.value); // 1-12 o 0 = todos
-
-  let filtradas = actividades.filter(a => {
-    let mes = new Date(a.fecha).getMonth() + 1;
-    return mesFiltro === 0 ? true : mes === mesFiltro;
+fetch("placas.json")
+  .then(res => res.json())
+  .then(json => {
+    datos = json;
+    estadoEl.textContent = "Archivo cargado ✔️";
+  })
+  .catch(err => {
+    console.error(err);
+    estadoEl.textContent = "Error cargando información ❌";
   });
 
-  filtradas.forEach(a => {
-    let fila = document.createElement("tr");
-    fila.innerHTML = `
-      <td>${formatearFecha(a.fecha)}</td>
-      <td>${a.categoria}</td>
-      <td>${a.servicio}</td>
-      <td>${a.lugar}</td>
-      <td>${a.detalle}</td>
-    `;
-    tablaBody.appendChild(fila);
+// ================== NORMALIZAR TEXTO ==================
+function normalizar(txt) {
+  return String(txt || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita acentos
+    .replace(/\s+/g, "")  // espacios
+    .replace(/[-_.]/g, ""); // guiones, puntos, etc.
+}
+
+// ================== BÚSQUEDA ==================
+function buscar() {
+  if (!datos || datos.length === 0) {
+    alert("Aún no se han cargado los datos.");
+    return;
+  }
+
+  const q = inputEl.value.trim();
+  if (q.length < 2) {
+    alert("Ingrese mínimo 2 caracteres.");
+    return;
+  }
+
+  const qNorm = normalizar(q);
+
+  // buscar en TODOS los campos de cada registro
+  const encontrados = datos.filter(row => {
+    const texto = Object.values(row).join(" ");
+    return normalizar(texto).includes(qNorm);
   });
 
-  if (filtradas.length === 0) {
-    tablaBody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align:center;color:#8fffff;">
-          No hay actividades para este mes.
-        </td>
-      </tr>`;
+  mostrarResultados(encontrados);
+}
+
+// ================== MOSTRAR RESULTADOS ==================
+function mostrarResultados(lista) {
+  resultadosActuales = lista;
+  resultadoEl.innerHTML = "";
+  similaresSelect.innerHTML = "<option value=''>-- seleccionar --</option>";
+  similaresBox.classList.add("oculto");
+
+  if (lista.length === 0) {
+    resultadoEl.innerHTML = "<div class='nope'>❓ Sin resultados</div>";
+    return;
   }
+
+  if (lista.length === 1) {
+    resultadoEl.innerHTML = generarTarjeta(lista[0]);
+    return;
+  }
+
+  // Varios resultados -> usamos SIMILARES
+  similaresBox.classList.remove("oculto");
+
+  lista.forEach((row, idx) => {
+    const placa   = row.placa || row.placas || "N/D";
+    const licencia = row.licencia || row.n_licencia || row.no_licencia || "";
+    const doc     = row.documento || row.no_documento || row.dpi || "";
+
+    const textoOpcion = [placa, licencia, doc]
+      .filter(Boolean)
+      .join(" — ");
+
+    const opt = document.createElement("option");
+    opt.value = idx;
+    opt.textContent = textoOpcion || `Registro ${idx + 1}`;
+    similaresSelect.appendChild(opt);
+  });
+
+  // opcional: mostrar el primero por defecto
+  resultadoEl.innerHTML = generarTarjeta(lista[0]);
 }
 
-/* ============================================
-   FORMATEAR FECHA A dd/mm/aaaa
-   ============================================ */
-function formatearFecha(fecha) {
-  const f = new Date(fecha);
-  let d = f.getDate().toString().padStart(2, "0");
-  let m = (f.getMonth() + 1).toString().padStart(2, "0");
-  let y = f.getFullYear();
-  return `${d}/${m}/${y}`;
+// ================== GENERAR TARJETA ==================
+function generarTarjeta(r) {
+  const placa   = r.placa || r.placas || "N/D";
+  const serie   = r.serie || "";
+  const boleta  = r["No. Boleta"] || r.boleta || "";
+  const licencia = r.licencia || r.n_licencia || r.no_licencia || "";
+  const dpi     = r.dpi || "";
+  const doc     = r.documento || r.no_documento || "";
+  const fecha   = r.fecha || "";
+  const hora    = r.hora || "";
+  const tipo    = r.tipo || "";
+  const marca   = r.marca || "";
+  const color   = r.color || "";
+  const dir     = r.direccion || r.dirección || "";
+
+  return `
+  <div class="tarjeta">
+    <div class="campo"><b>Placa:</b> ${placa}</div>
+    ${serie ? `<div class="campo"><b>Serie:</b> ${serie}</div>` : ""}
+    ${boleta ? `<div class="campo"><b>No. Boleta:</b> ${boleta}</div>` : ""}
+    ${licencia ? `<div class="campo"><b>Licencia:</b> ${licencia}</div>` : ""}
+    ${dpi ? `<div class="campo"><b>DPI:</b> ${dpi}</div>` : ""}
+    ${doc ? `<div class="campo"><b>Documento:</b> ${doc}</div>` : ""}
+    ${fecha ? `<div class="campo"><b>Fecha:</b> ${fecha}</div>` : ""}
+    ${hora ? `<div class="campo"><b>Hora:</b> ${hora}</div>` : ""}
+    ${tipo ? `<div class="campo"><b>Tipo:</b> ${tipo}</div>` : ""}
+    ${marca ? `<div class="campo"><b>Marca:</b> ${marca}</div>` : ""}
+    ${color ? `<div class="campo"><b>Color:</b> ${color}</div>` : ""}
+    ${dir ? `<div class="campo"><b>Dirección:</b> ${dir}</div>` : ""}
+  </div>
+  `;
 }
 
-/* ============================================
-   CAMBIO DE MES
-   ============================================ */
-verMes.onchange = mostrarTabla;
+// ================== EVENTOS ==================
+btnBuscar.addEventListener("click", buscar);
 
-/* ============================================
-   INICIO
-   ============================================ */
-mostrarTabla();
-mostrar("Agenda lista para trabajar");
+inputEl.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    buscar();
+  }
+});
+
+// cambio en SIMILARES
+similaresSelect.addEventListener("change", () => {
+  const idx = similaresSelect.value;
+  if (idx === "") return;
+  const row = resultadosActuales[idx];
+  if (row) {
+    resultadoEl.innerHTML = generarTarjeta(row);
+  }
+});
