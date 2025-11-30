@@ -1,212 +1,131 @@
-/* ===========================
-   ESTILO GLOBAL NEÓN GELM
-=========================== */
 body {
-    background: radial-gradient(circle at top, #00111c, #000010 70%);
-    color: #d6fff1;
-    font-family: Arial, Helvetica, sans-serif;
-    margin: 0;
-    padding: 0;
+    background: radial-gradient(circle at top, #0a0f2b, #02010f 70%);
+    font-family: Arial, sans-serif;
+    color: #cfffff;
     text-align: center;
 }
 
 .contenedor {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 20px;
-}
-
-/* ===========================
-   TÍTULO
-=========================== */
-.titulo {
-    margin-bottom: 25px;
+    width: 85%;
+    margin: auto;
+    padding-top: 20px;
 }
 
 .logo {
-    width: 110px;
-    filter: drop-shadow(0 0 10px #00ffea);
+    width: 130px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 15px #00ffe7);
 }
 
-h2, h3 {
-    margin: 4px 0;
-    text-shadow: 0 0 8px #00eaff;
+.titulo h2 {
+    font-size: 26px;
+    text-shadow: 0 0 12px #00eaff;
 }
 
-/* ===========================
-   ESTADO DEL ARCHIVO
-=========================== */
+.titulo h3 {
+    font-size: 18px;
+    color: #78f5ff;
+    margin-top: -10px;
+}
+
+/* Estado de carga */
 .estado {
-    margin: 10px 0;
-    padding: 8px;
-    background: rgba(0, 255, 255, 0.1);
-    border: 1px solid #00ffee;
-    border-radius: 7px;
-    display: inline-block;
-    box-shadow: 0 0 10px #00c9ff;
+    margin-top: 10px;
+    font-size: 15px;
+    color: #33eeff;
 }
 
-/* ===========================
-   BARRA DE BÚSQUEDA
-=========================== */
-.buscadorBox {
+/* BARRA DE BÚSQUEDA NEÓN */
+.barraBusqueda {
+    width: 60%;
     margin: 20px auto;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+    padding: 15px;
+    background: #00111a;
+    border-radius: 15px;
+    box-shadow: 0 0 18px #00eaff;
 }
 
-#busquedaInput {
-    width: 350px;
-    padding: 9px 12px;
-    border-radius: 8px;
+.barraBusqueda input {
+    width: 70%;
+    padding: 11px;
+    border-radius: 10px;
     border: none;
     outline: none;
     font-size: 16px;
-    background: #000;
-    color: #22ffdd;
-    border: 2px solid #009e9e;
-    box-shadow: 0 0 12px #00e6cf;
 }
 
-#busquedaInput:focus {
-    border-color: #00fff2;
-    box-shadow: 0 0 15px #34ffff;
-}
-
-#btnBuscar {
-    padding: 10px 18px;
-    background: linear-gradient(90deg, #0066ff, #00ccff);
-    border: none;
-    border-radius: 8px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 0 12px #008cff;
-}
-
-#btnBuscar:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 18px #00bfff;
-}
-
-/* ===========================
-   NOTA EJEMPLO
-=========================== */
-.notaEj {
-    display: block;
-    margin-bottom: 20px;
-    font-size: 13px;
-    opacity: 0.85;
-}
-
-/* ===========================
-   LISTA DE RESULTADOS COMPACTA
-=========================== */
-#resultadosLista {
-    width: 100%;
-    margin: 20px auto;
-    padding: 10px;
+.barraBusqueda button {
+    padding: 11px 30px;
     border-radius: 10px;
-    background: rgba(0, 255, 255, 0.07);
-    border: 1px solid #00ffd5;
-    box-shadow: 0 0 12px #00ffe5;
+    border: none;
+    background: #00eaff;
+    color: #00111a;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    transition: 0.3s;
 }
 
-.oculto {
-    display: none;
+.barraBusqueda button:hover {
+    background: #008ab5;
 }
 
-#tituloResultados {
-    font-size: 20px;
-    margin-bottom: 10px;
-    color: #9dfff8;
-    text-shadow: 0 0 7px #00fff2;
+/* LISTA DE RESULTADOS NEÓN */
+.listaNeon {
+    width: 80%;
+    margin: auto;
+    margin-top: 20px;
 }
 
-/* ===========================
-   ITEM DE RESULTADO
-=========================== */
 .itemResultado {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-    margin: 6px 0;
-    background: rgba(0, 20, 25, 0.8);
-    border: 1px solid #00ffe1;
+    background: #000;
+    margin: 6px auto;
+    padding: 12px;
+    width: 85%;
     border-radius: 8px;
     cursor: pointer;
-    transition: 0.15s;
-    box-shadow: 0 0 10px #00eaff55;
+    color: #00f2ff;
+    font-weight: bold;
+    border: 1px solid #00eaff55;
+    box-shadow: 0 0 10px #00eaff44;
+    transition: 0.25s;
 }
 
 .itemResultado:hover {
-    background: rgba(0, 255, 255, 0.12);
-    transform: scale(1.02);
-    box-shadow: 0 0 15px #00ffea;
+    background: #00222c;
+    box-shadow: 0 0 15px #00f6ff;
+    transform: scale(1.03);
 }
 
-.itemIndex {
-    font-size: 18px;
-    font-weight: bold;
-    width: 40px;
-    color: #00ffee;
-    text-shadow: 0 0 10px #00FFF2;
-}
-
-.itemData {
-    text-align: left;
-    font-size: 16px;
-    word-spacing: 2px;
-}
-
-/* ===========================
-   PANEL DE FICHA DETALLADA
-=========================== */
-#detalleRegistro {
+/* TARJETA DETALLE */
+.detalleNeon {
     margin-top: 25px;
-    padding: 18px;
-    border-radius: 10px;
-    background: rgba(0, 60, 70, 0.2);
-    border: 1px solid #00eaff;
-    box-shadow: 0 0 15px #00eaff99;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.fichaTitulo {
-    font-size: 22px;
-    margin-bottom: 12px;
-    text-shadow: 0 0 8px #00ffea;
-}
-
-/* UNA FILA DE LA TABLA DETALLADA */
-.fFila {
-    display: grid;
-    grid-template-columns: 30% 70%;
-    padding: 6px 0;
-    border-bottom: 1px solid #00fff566;
-}
-
-.fCampo {
-    color: #8bffea;
-    text-shadow: 0 0 6px #00ffe1;
-    font-weight: bold;
-    text-align: right;
-    padding-right: 10px;
-}
-
-.fValor {
-    color: #fff;
+.tarjetaDetalle {
+    background: #000814;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #00eaff88;
+    border: 1px solid #00eaff55;
     text-align: left;
 }
 
-/* ===========================
-   FOOTER
-=========================== */
-.footer {
-    margin-top: 40px;
-    padding: 15px;
-    font-size: 13px;
-    opacity: 0.7;
-    color: #8affff;
-    text-shadow: 0 0 7px #00ffea;
+.fila {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #003644;
+}
+
+.campo {
+    font-weight: bold;
+    color: #00f2ff;
+}
+
+.valor {
+    color: #baffff;
 }
