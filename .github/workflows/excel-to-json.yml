@@ -1,89 +1,37 @@
-name: Convertir Excel a JSON (placas)
+name: Convert Excel to JSON
 
 on:
   push:
     paths:
-      - "placas.xlsx"  # solo corre cuando cambie el Excel
-  workflow_dispatch:   # para correrlo a mano si querés
-
-permissions:
-  contents: write
+      - "placas.xlsx"
+  schedule:
+    - cron: "0 6 * * *"   # Se ejecuta todos los días a las 6 AM UTC
 
 jobs:
-  build:
+  convert:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Configurar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Instalar dependencias
+      - name: Install dependencies
         run: |
-          pip install pandas openpyxl
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip
+          pip3 install pandas openpyxl
 
-      - name: Convertir placas.xlsx a placas.json
+      - name: Convert Excel to JSON
         run: |
-          python << 'EOF'
+          python3 <<EOF
           import pandas as pd
-
-          # Leer el Excel (primera hoja: PLACAS)
           df = pd.read_excel("placas.xlsx")
-
-          # Columnas que SÍ queremos (hasta 'chapa')
-          cols_map = {
-              "serie": "serie",
-              "No. Boleta": "no_boleta",
-              "fecha": "fecha",
-              "hora": "hora",
-              "placas": "placas",
-              "tipo": "tipo",
-              "marca": "marca",
-              "color": "color",
-              "direccion": "direccion",
-              "departamento": "departamento",
-              "Municipio": "municipio",
-              "nombre del conductor ": "conductor",
-              "lic": "lic",
-              "No. Licencia": "no_licencia",
-              "articulo": "articulo",
-              "descripcion ": "descripcion",
-              "chapa": "chapa",
-          }
-
-          # Nos quedamos solo con esas columnas (en ese orden)
-          df = df[list(cols_map.keys())].copy()
-
-          # Renombrar columnas para que las llaves del JSON estén limpias
-          df.rename(columns=cols_map, inplace=True)
-
-          # Quitar filas totalmente vacías
-          df.dropna(how="all", inplace=True)
-
-          # Reemplazar NaN por cadena vacía (para que el JSON no tenga null raros)
-          df = df.where(pd.notnull(df), "")
-
-          # Exportar a JSON bonito
-          df.to_json(
-              "placas.json",
-              orient="records",
-              force_ascii=False,
-              indent=2
-          )
+          df.to_json("placas.json", orient="records", force_ascii=False, indent=2)
           EOF
 
-      - name: Commit y push de placas.json
+      - name: Commit JSON file
         run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
           git add placas.json
-          if git diff --cached --quiet; then
-            echo "Sin cambios en placas.json"
-          else
-            git commit -m "Auto-update placas.json desde placas.xlsx"
-            git push
-          fi
+          git commit -m "Auto-update placas.json"
+          git push
