@@ -1,100 +1,50 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CONSULTA MULTAS CHIMALTENANGO</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="app.js" defer></script>
-
-  <!-- Protección básica (opcional, la puedes quitar si quieres) -->
-  <script>
-    document.addEventListener("contextmenu", e => e.preventDefault());
-    document.addEventListener("keydown", function(e){
-      if (
-        e.keyCode === 123 || // F12
-        (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
-        (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
-        (e.ctrlKey && e.shiftKey && e.keyCode === 67) || // Ctrl+Shift+C
-        (e.ctrlKey && e.keyCode === 85) ||               // Ctrl+U
-        (e.ctrlKey && e.keyCode === 83)                  // Ctrl+S
-      ) {
-        e.preventDefault();
-        return false;
-      }
-    });
-    ["copy","cut","paste","selectstart"].forEach(ev=>{
-      document.addEventListener(ev, e => e.preventDefault());
-    });
-  </script>
+<meta charset="UTF-8">
+<title>Buscador PMT | GELM</title>
+<link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
 <div class="contenedor">
 
-  <!-- ENCABEZADO -->
-  <div class="header-top">
-    <div class="logo-box">
-      <img src="https://gelmhistoria.webcindario.com/multas/logoMUNI.jpg" alt="MUNI">
+    <div class="titulo">
+        <img src="icons/logo.png" class="logo">
+        <h2>MUNICIPALIDAD DE CHIMALTENANGO<br>MULTAS PENDIENTES DE PAGO</h2>
+        <h3>Sistema de Consulta — BY GELM</h3>
     </div>
 
-    <div class="titulos">
-      <div class="titulos-linea1">MUNICIPALIDAD DE CHIMALTENANGO</div>
-      <div class="titulos-linea2">MULTAS PENDIENTES DE PAGO</div>
-      <div class="titulos-linea3">Sistema de Consulta == BY GELM ==</div>
-      <div class="titulos-linea4">Busca tu placa, n. licencia o n. documento</div>
+    <div id="estado" class="estado">Cargando archivo...</div>
+
+    <!-- BARRA DE BÚSQUEDA -->
+    <div class="buscadorBox">
+        <input id="busquedaInput" type="text" placeholder="Ingresa placa, licencia o documento">
+        <button id="btnBuscar">Buscar</button>
     </div>
 
-    <div class="logo-box">
-      <img src="https://gelmhistoria.webcindario.com/PMT/gelm.png" alt="GELM">
+    <small class="notaEj">
+        Puedes escribir con o sin espacios / guiones. Ej:<br>
+        1918619070805 = 1918619070805 — M-098HJX = M098HJX
+    </small>
+
+    <!-- RESULTADOS COMPACTOS -->
+    <div id="resultadosLista">
+        <div id="tituloResultados">Resultados</div>
+        <div id="contenidoResultados"></div>
     </div>
-  </div>
 
-  <!-- ESTADO DE CARGA -->
-  <div id="estado" class="estado">Cargando archivo...</div>
-
-  <!-- BUSCADOR -->
-  <div class="buscador">
-    <input
-      id="busquedaInput"
-      type="text"
-      placeholder="Placa, licencia, DPI, documento o No. calcomanía..."
-    />
-    <button id="btnBuscar">Buscar</button>
-  </div>
-
-  <p class="nota">
-    Puedes escribir con o sin espacios / guiones:<br>
-    <b>1918-61907-0805</b> = <b>1918619070805</b> — 
-    <b>M-098HJX</b> = <b>M098HJX</b>
-  </p>
-
-  <!-- RESULTADO PRINCIPAL -->
-  <div id="resultado"></div>
-
-  <!-- SIMILARES -->
-  <div id="similaresBox" class="similares-box oculto">
-    <span class="similares-label">SIMILARES:</span>
-    <select id="similaresSelect">
-      <option value="">-- seleccionar --</option>
-    </select>
-  </div>
-
-  <!-- CONTACTO -->
-  <div class="contacto-wrapper">
-    <button class="btn-contacto" onclick="location.href='mailto:nerox2mil@proton.me'">
-      <span class="icono">💬</span>
-      <span>Más información / Contactar a MUNICIPALIDAD DE CHIMALTENANGO</span>
-    </button>
-  </div>
+    <!-- DETALLE POR CLIC -->
+    <div id="detalleRegistro"></div>
 
 </div>
 
-<footer class="pie">
-  <div>2014 - 2025 | BY GELM | Delegación de Transportes PMT</div>
-  <div id="pie-linea2">att: ---[GELM]---</div>
-  <div id="pie-fecha"></div>
+<footer class="footer">
+    2014 - 2025 | BY GELM | Delegación de Transportes PMT <br>
+    att: —[GELM]—
 </footer>
 
+<script src="app.js"></script>
 </body>
 </html>
