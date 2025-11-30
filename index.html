@@ -1,458 +1,186 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<title>Buscador PMT - Placas y Licencias</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-:root{
-  --cian:#00ffe6;
-  --verde:#00ff6a;
-  --rojo:#ff0044;
-  --bg:#050509;
-  --panel:#05070b;
-  --borde:#00ffe6;
-  --text:#f5f5f5;
-  --accent:#ffdd33;
-  --danger:#ff4d6a;
-  --radius:14px;
-  --shadow:0 0 35px rgba(0,255,230,0.4);
-  --shadow-soft:0 0 18px rgba(0,0,0,0.8);
-}
+<!-- ======================= ? PROTECCIÓN ANTI-ROBO ? ======================= -->
+<script>
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("keydown", function(e){
+    if(
+        e.keyCode === 123 ||
+        (e.ctrlKey && e.shiftKey && e.keyCode===73) ||
+        (e.ctrlKey && e.shiftKey && e.keyCode===74) ||
+        (e.ctrlKey && e.shiftKey && e.keyCode===67) ||
+        (e.ctrlKey && e.keyCode===85) ||
+        (e.ctrlKey && e.keyCode===83)
+    ){
+        e.preventDefault();
+        return false;
+    }
+});
+["copy","cut","paste","selectstart"].forEach(ev=>{
+    document.addEventListener(ev, e => e.preventDefault());
+});
+</script>
+<!-- ========================================================================== -->
 
-*{box-sizing:border-box;margin:0;padding:0;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONSULTA MULTAS CHIMALTENANGO</title>
 
-body{
-  min-height:100vh;
-  background:radial-gradient(circle at top,#1b0033 0%,#000 45%,#020608 100%);
-  color:var(--text);
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-}
+<link rel="stylesheet" href="styles.css">
 
-.app{
-  width:100%;
-  max-width:1080px;
-  background:rgba(0,0,0,0.88);
-  border-radius:22px;
-  border:2px solid rgba(0,255,230,0.8);
-  box-shadow:var(--shadow),0 0 90px rgba(0,0,0,0.9);
-  padding:22px 18px 20px;
-}
-
-.app-header{
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:16px;
-}
-.app-title{
-  font-size:20px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  color:var(--cian);
-  text-shadow:0 0 14px rgba(0,255,230,0.9);
-}
-.app-sub{
-  font-size:11px;
-  color:#a0f7ff;
-  text-transform:uppercase;
-}
-
-.badge{
-  font-size:11px;
-  padding:3px 10px;
-  border-radius:999px;
-  border:1px solid rgba(0,255,230,0.6);
-  color:var(--accent);
-  background:linear-gradient(90deg,rgba(0,0,0,0.7),rgba(0,0,0,0.2));
-}
-
-.search-panel{
-  margin-top:10px;
-  display:grid;
-  grid-template-columns:minmax(0,1.6fr) minmax(0,1.1fr) auto;
-  gap:12px;
-  align-items:end;
-}
-@media(max-width:780px){
-  .search-panel{
-    grid-template-columns:minmax(0,1fr);
-  }
-}
-
-.field{
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-}
-label{
-  font-size:12px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  color:#b0fafa;
-}
-
-input[type="text"]{
-  background:#020308;
-  border-radius:var(--radius);
-  border:1px solid rgba(0,255,230,0.45);
-  padding:10px 12px;
-  font-size:15px;
-  color:var(--text);
-  outline:none;
-  box-shadow:var(--shadow-soft);
-}
-input[type="text"]::placeholder{
-  color:#788a90;
-}
-
-.mode-toggle{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  padding:9px 10px;
-  border-radius:var(--radius);
-  border:1px solid rgba(0,255,230,0.45);
-  background:linear-gradient(135deg,rgba(0,0,0,0.85),rgba(0,10,20,0.96));
-  box-shadow:var(--shadow-soft);
-}
-.mode-toggle label{
-  display:flex;
-  align-items:center;
-  gap:4px;
-  font-size:12px;
-  letter-spacing:0.5px;
-  text-transform:none;
-  color:#e1ffff;
-}
-.mode-toggle input{
-  accent-color:var(--cian);
-}
-
-.btn{
-  border:none;
-  border-radius:var(--radius);
-  padding:11px 18px;
-  background:radial-gradient(circle at top,var(--cian) 0%,#0088ff 40%,#00142a 100%);
-  color:#001015;
-  font-weight:700;
-  font-size:14px;
-  cursor:pointer;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  box-shadow:0 0 16px rgba(0,255,230,0.8);
-  transition:transform .12s ease-out,box-shadow .12s ease-out,filter .12s ease-out;
-}
-.btn:hover{
-  transform:translateY(-1px) scale(1.02);
-  box-shadow:0 0 24px rgba(0,255,230,1);
-  filter:brightness(1.05);
-}
-.btn:active{
-  transform:translateY(1px) scale(0.98);
-  box-shadow:0 0 14px rgba(0,255,230,0.7);
-}
-
-/* summary */
-.summary{
-  margin-top:10px;
-  font-size:12px;
-  color:#d0f9ff;
-  min-height:18px;
-}
-
-/* selector resultados */
-.results-panel{
-  margin-top:16px;
-  display:none;
-}
-.results-panel.active{
-  display:block;
-}
-.results-header{
-  font-size:12px;
-  margin-bottom:6px;
-  color:#bffcff;
-}
-select#resultadoSelect{
-  width:100%;
-  background:#050910;
-  color:var(--text);
-  border-radius:var(--radius);
-  border:1px solid rgba(0,255,230,0.55);
-  padding:9px 10px;
-  font-size:13px;
-  box-shadow:var(--shadow-soft);
-}
-
-/* tarjeta detalle */
-.detalle{
-  margin-top:18px;
-  padding:14px 14px 10px;
-  border-radius:18px;
-  background:linear-gradient(145deg,rgba(0,0,0,0.94),rgba(0,12,24,0.98));
-  border:1px solid rgba(0,255,230,0.45);
-  box-shadow:0 0 26px rgba(0,0,0,0.95),0 0 28px rgba(0,255,230,0.35);
-}
-.detalle-title{
-  font-size:15px;
-  margin-bottom:6px;
-  color:var(--verde);
-  text-shadow:0 0 10px rgba(0,255,106,0.8);
-}
-.detalle-sub{
-  font-size:11px;
-  color:#9be8ff;
-  margin-bottom:10px;
-}
-
-.table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
-}
-.table tr:nth-child(odd){
-  background:rgba(255,255,255,0.01);
-}
-.table th,
-.table td{
-  padding:4px 6px;
-  text-align:left;
-}
-.table th{
-  color:#8de8ff;
-  font-weight:600;
-  text-transform:uppercase;
-  font-size:11px;
-  letter-spacing:0.5px;
-}
-.table td{
-  color:#f0faff;
-}
-
-/* mensajes */
-.msg{
-  margin-top:12px;
-  font-size:12px;
-}
-.msg.error{
-  color:var(--danger);
-}
-.msg.info{
-  color:#b8f4ff;
-}
-.highlight{
-  color:var(--accent);
-  font-weight:600;
-}
-
-/* footer */
-.footer{
-  margin-top:10px;
-  font-size:10px;
-  text-align:right;
-  color:#6fffee;
-}
-</style>
 </head>
 <body>
-<div class="app">
-  <div class="app-header">
-    <div>
-      <div class="app-title">Buscador PMT</div>
-      <div class="app-sub">Placas &middot; N&uacute;mero de licencia &middot; Historial</div>
+
+<div class="contenedor">
+
+    <!-- ENCABEZADO COMPLETO -->
+    <div class="header-top">
+        <div class="logo-box">
+            <img src="https://gelmhistoria.webcindario.com/multas/logoMUNI.jpg" alt="PMT">
+        </div>
+
+        <div class="titulos">
+            <div class="titulos-linea1">MUNICIPALIDAD DE CHIMALTENANGO</div>
+            <div class="titulos-linea2">MULTAS PENDIENTES DE PAGO</div>
+            <div class="titulos-linea3">Sistema de Consulta  == BY GELM == ?</div>
+            <div class="titulos-linea4">Busca tu placa. n.licencia o n.documento</div>
+        </div>
+
+        <div class="logo-box">
+            <img src="https://gelmhistoria.webcindario.com/PMT/gelm.png" alt="GELM">
+        </div>
     </div>
-    <div class="badge">M&oacute;dulo independiente :: by--gelm::</div>
-  </div>
 
-  <div class="search-panel">
-    <div class="field">
-      <label for="query">Texto de b&uacute;squeda</label>
-      <input id="query" type="text" placeholder="Ej: M-098HJX  &middot;  1918-61907-0805  &middot;  1918619070805">
+    <div id="estado">Cargando archivo...</div>
+
+    <div class="buscador">
+        <input id="busquedaInput" type="text"
+            placeholder="Placa, licencia, DPI, documento o No. calcomanía...">
+        <button id="btnBuscar">Buscar</button>
     </div>
-    <div class="field">
-      <label>Modo</label>
-      <div class="mode-toggle">
-        <label><input type="radio" name="mode" value="placa" checked> Por placa</label>
-        <label><input type="radio" name="mode" value="licencia"> Por n&uacute;mero de licencia</label>
-      </div>
+
+    <p class="nota">
+        Puedes escribir con o sin espacios / guiones:<br>
+        <b>1918-61907-0805</b> = <b>1918619070805</b> ? 
+        <b>M-098HJX</b> = <b>M098HJX</b>
+    </p>
+
+    <div id="resultado"></div>
+
+    <div id="similaresBox" class="similares-box oculto">
+        <span class="similares-label">SIMILARES:</span>
+        <select id="similaresSelect">
+            <option value="">-- seleccionar --</option>
+        </select>
     </div>
-    <div class="field">
-      <button id="btnBuscar" class="btn">Buscar</button>
+
+    <div class="contacto-wrapper">
+        <button class="btn-contacto" onclick="location.href='mailto:nerox2mil@proton.me'">
+            <span class="icono">??</span>
+            <span>Más información / Contactar a MUNICIPALIDAD DE CHIMALTENANGO</span>
+        </button>
     </div>
-  </div>
 
-  <div id="summary" class="summary"></div>
-
-  <div id="resultsPanel" class="results-panel">
-    <div class="results-header">Coincidencias encontradas:</div>
-    <select id="resultadoSelect" size="4"></select>
-  </div>
-
-  <div id="detalle" class="detalle" style="display:none;"></div>
-
-  <div id="msg" class="msg info"></div>
-
-  <div class="footer">
-    PMT Chimaltenango &bull; M&oacute;dulo interno de consulta
-  </div>
 </div>
 
+<footer class="pie">
+    <div>2014 - 2025 | BY GELM | Delegación de Transportes PMT</div>
+    <div id="pie-linea2">att: ---[GELM]---</div>
+    <div id="pie-fecha"></div>
+</footer>
+
 <script>
-const DATA_URL = 'placas.json'; // mismo directorio
+// ============= CARGAR JSON ==============
+let datos = [];
 
-let registros = [];
-let ultimosResultados = [];
+fetch("https://gelmhistoria.webcindario.com/multas/placas.json")
+    .then(res => res.json())
+    .then(json => {
+        datos = json;
+        document.getElementById("estado").textContent = "Archivo cargado ?";
+    })
+    .catch(() => {
+        document.getElementById("estado").textContent = "Error cargando información";
+    });
 
-function normalizarPlaca(txt){
-  if(!txt) return '';
-  return txt.toUpperCase().replace(/[^A-Z0-9]/g,'');
-}
-function normalizarLicencia(txt){
-  if(!txt) return '';
-  return txt.replace(/[^0-9A-Za-z]/g,''); // quita guiones, espacios, etc.
+function normalizar(txt){
+    return txt.toString()
+              .toLowerCase()
+              .replace(/\s+/g, "")
+              .replace(/-/g, "")
+              .replace(/\./g, "");
 }
 
-async function cargarDatos(){
-  try{
-    const resp = await fetch(DATA_URL,{cache:'no-store'});
-    registros = await resp.json();
-    document.getElementById('msg').textContent =
-      'Base cargada: ' + registros.length + ' registros disponibles.';
-  }catch(e){
-    console.error(e);
-    document.getElementById('msg').textContent =
-      'Error cargando la base de datos (placas.json).';
-    document.getElementById('msg').className = 'msg error';
-  }
-}
+document.getElementById("btnBuscar").addEventListener("click", buscar);
 
 function buscar(){
-  const qRaw = document.getElementById('query').value.trim();
-  const mode = document.querySelector('input[name="mode"]:checked').value;
-  const summary = document.getElementById('summary');
-  const msg = document.getElementById('msg');
-  const panel = document.getElementById('resultsPanel');
-  const select = document.getElementById('resultadoSelect');
-  const detalle = document.getElementById('detalle');
+    const q = normalizar(document.getElementById("busquedaInput").value);
 
-  detalle.style.display = 'none';
-  detalle.innerHTML = '';
-  panel.classList.remove('active');
-  select.innerHTML = '';
-  msg.textContent = '';
-  msg.className = 'msg info';
-
-  if(!qRaw){
-    summary.textContent = '';
-    msg.textContent = 'Escribe una placa o un número de licencia para iniciar la búsqueda.';
-    return;
-  }
-
-  let qNorm;
-  if(mode === 'placa'){
-    qNorm = normalizarPlaca(qRaw);
-  }else{
-    qNorm = normalizarLicencia(qRaw);
-  }
-  if(!qNorm){
-    summary.textContent = '';
-    msg.textContent = 'El texto ingresado no contiene caracteres válidos.';
-    return;
-  }
-
-  let resultados;
-  if(mode === 'placa'){
-    resultados = registros.filter(r => r.placa_norm && r.placa_norm.includes(qNorm));
-  }else{
-    resultados = registros.filter(r => r.licencia_norm && r.licencia_norm.includes(qNorm));
-  }
-
-  ultimosResultados = resultados;
-
-  if(!resultados.length){
-    summary.innerHTML = 'Sin resultados para <span class="highlight">'+qRaw+'</span> ('+mode+').';
-    msg.textContent = 'Verifica si la placa o licencia está bien escrita. Recuerda que la búsqueda ignora espacios y guiones.';
-    msg.className = 'msg error';
-    return;
-  }
-
-  summary.innerHTML = 'Se encontraron <span class="highlight">'+resultados.length+'</span> coincidencia(s) para <span class="highlight">'+qRaw+'</span> buscando por '+mode+'.';
-
-  if(resultados.length === 1){
-    mostrarDetalle(resultados[0]);
-  }else{
-    panel.classList.add('active');
-    resultados.forEach((r,idx)=>{
-      const opt = document.createElement('option');
-      const placa = r.placa || 'SIN PLACA';
-      const lic = r.licencia || 'SIN LICENCIA';
-      const fecha = r.fecha || '';
-      const boleta = r.boleta || '';
-      opt.value = idx;
-      opt.textContent = placa+'  |  Lic: '+lic+'  |  Boleta: '+boleta+'  |  '+fecha;
-      select.appendChild(opt);
-    });
-    if(resultados.length){
-      select.selectedIndex = 0;
-      mostrarDetalle(resultados[0]);
+    if(q.length < 2){
+        alert("Ingrese mínimo 2 caracteres");
+        return;
     }
-  }
+
+    let resultados = datos.filter(row =>
+        normalizar(row.placa).includes(q) ||
+        normalizar(row.licencia).includes(q)
+    );
+
+    mostrarResultados(resultados);
 }
 
-function mostrarDetalle(reg){
-  const detalle = document.getElementById('detalle');
-  if(!reg){
-    detalle.style.display = 'none';
-    detalle.innerHTML = '';
-    return;
-  }
-  detalle.style.display = 'block';
+function mostrarResultados(lista){
+    const box = document.getElementById("resultado");
+    const similaresBox = document.getElementById("similaresBox");
+    const sel = document.getElementById("similaresSelect");
 
-  const placa = reg.placa || 'SIN PLACA';
-  const lic = reg.licencia || 'SIN LICENCIA';
+    box.innerHTML = "";
+    sel.innerHTML = "<option value=''>-- seleccionar --</option>";
+    similaresBox.classList.add("oculto");
 
-  detalle.innerHTML = `
-    <div class="detalle-title">Placa ${placa}</div>
-    <div class="detalle-sub">No. licencia: <span class="highlight">${lic}</span> &middot; Boleta: ${reg.boleta || ''} &middot; Fecha: ${reg.fecha || ''} &middot; Hora: ${reg.hora || ''}</div>
-    <table class="table">
-      <tbody>
-        <tr><th>Serie</th><td>${reg.serie || ''}</td></tr>
-        <tr><th>Tipo</th><td>${reg.tipo || ''}</td></tr>
-        <tr><th>Marca</th><td>${reg.marca || ''}</td></tr>
-        <tr><th>Color</th><td>${reg.color || ''}</td></tr>
-        <tr><th>Direcci&oacute;n</th><td>${reg.direccion || ''}</td></tr>
-        <tr><th>Departamento</th><td>${reg.departamento || ''}</td></tr>
-        <tr><th>Municipio</th><td>${reg.municipio || ''}</td></tr>
-        <tr><th>Conductor</th><td>${reg.conductor || ''}</td></tr>
-        <tr><th>Art&iacute;culo</th><td>${reg.articulo || ''}</td></tr>
-        <tr><th>Descripci&oacute;n</th><td>${reg.descripcion || ''}</td></tr>
-        <tr><th>Chapa</th><td>${reg.chapa || ''}</td></tr>
-      </tbody>
-    </table>
-  `;
+    if(lista.length === 0){
+        box.innerHTML = "<div class='nope'>? Sin resultados</div>";
+        return;
+    }
+
+    if(lista.length === 1){
+        box.innerHTML = generarTarjeta(lista[0]);
+        return;
+    }
+
+    similaresBox.classList.remove("oculto");
+
+    lista.forEach((row, i) => {
+        let opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = `${row.placa} ? ${row.conductor}`;
+        sel.appendChild(opt);
+    });
+
+    sel.addEventListener("change", () => {
+        if(sel.value !== ""){
+            box.innerHTML = generarTarjeta(lista[sel.value]);
+        }
+    });
 }
 
-document.getElementById('btnBuscar').addEventListener('click', buscar);
-document.getElementById('query').addEventListener('keydown', e=>{
-  if(e.key === 'Enter') buscar();
-});
-document.getElementById('resultadoSelect').addEventListener('change', e=>{
-  const idx = parseInt(e.target.value,10);
-  if(!isNaN(idx) && ultimosResultados[idx]){
-    mostrarDetalle(ultimosResultados[idx]);
-  }
-});
-
-// carga inicial
-cargarDatos();
+function generarTarjeta(r){
+return `
+<div class="tarjeta">
+    <div class="campo"><b>Placa:</b> ${r.placa}</div>
+    <div class="campo"><b>Licencia:</b> ${r.licencia}</div>
+    <div class="campo"><b>Fecha:</b> ${r.fecha}</div>
+    <div class="campo"><b>Hora:</b> ${r.hora}</div>
+    <div class="campo"><b>Tipo:</b> ${r.tipo}</div>
+    <div class="campo"><b>Marca:</b> ${r.marca}</div>
+    <div class="campo"><b>Color:</b> ${r.color}</div>
+    <div class="campo"><b>Conductor:</b> ${r.conductor}</div>
+</div>
+`;
+}
 </script>
+
 </body>
 </html>
