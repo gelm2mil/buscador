@@ -1,97 +1,212 @@
+/* ===========================
+   ESTILO GLOBAL NEÓN GELM
+=========================== */
 body {
-    background: #0a0015;
-    font-family: Arial;
-    color: white;
+    background: radial-gradient(circle at top, #00111c, #000010 70%);
+    color: #d6fff1;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
     text-align: center;
 }
 
 .contenedor {
-    width: 90%;
-    margin: auto;
-    margin-top: 20px;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+/* ===========================
+   TÍTULO
+=========================== */
+.titulo {
+    margin-bottom: 25px;
 }
 
 .logo {
-    width: 120px;
+    width: 110px;
+    filter: drop-shadow(0 0 10px #00ffea);
 }
 
+h2, h3 {
+    margin: 4px 0;
+    text-shadow: 0 0 8px #00eaff;
+}
+
+/* ===========================
+   ESTADO DEL ARCHIVO
+=========================== */
 .estado {
-    margin: 10px;
-    color: #55ff99;
-    font-weight: bold;
+    margin: 10px 0;
+    padding: 8px;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid #00ffee;
+    border-radius: 7px;
+    display: inline-block;
+    box-shadow: 0 0 10px #00c9ff;
 }
 
+/* ===========================
+   BARRA DE BÚSQUEDA
+=========================== */
 .buscadorBox {
-    margin-top: 15px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
 #busquedaInput {
-    width: 65%;
-    padding: 10px;
-    border-radius: 6px;
+    width: 350px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background: #000;
+    color: #22ffdd;
+    border: 2px solid #009e9e;
+    box-shadow: 0 0 12px #00e6cf;
+}
+
+#busquedaInput:focus {
+    border-color: #00fff2;
+    box-shadow: 0 0 15px #34ffff;
 }
 
 #btnBuscar {
-    padding: 10px 20px;
-    background: cyan;
-    color: black;
+    padding: 10px 18px;
+    background: linear-gradient(90deg, #0066ff, #00ccff);
     border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-/* PANEL LISTA COMPACTA */
-#resultadosLista {
-    width: 95%;
-    max-height: 260px;
-    margin: 20px auto;
-    background: rgba(0,0,0,0.8);
-    border: 2px solid cyan;
-    border-radius: 12px;
-    padding: 10px;
-    overflow-y: auto;
-    display: none;
-    box-shadow: 0 0 15px cyan;
-}
-
-.lineaRegistro {
-    padding: 7px;
-    border-bottom: 1px solid #00eaff55;
-    cursor: pointer;
-    transition: 0.2s;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.lineaRegistro:hover {
-    background: rgba(0,255,255,0.2);
-}
-
-/* DETALLE */
-#detalleRegistro {
-    width: 95%;
-    margin: 20px auto;
-    background: rgba(0,0,0,0.9);
-    border: 2px solid #00ff99;
-    border-radius: 12px;
-    padding: 15px;
-    display: none;
-    text-align: left;
-    box-shadow: 0 0 20px #00ff99;
-}
-
-.detCampo {
-    margin: 4px 0;
+    border-radius: 8px;
+    color: white;
     font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 0 12px #008cff;
 }
 
-.detCampo b {
-    color: #00ffcc;
+#btnBuscar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 18px #00bfff;
 }
 
+/* ===========================
+   NOTA EJEMPLO
+=========================== */
+.notaEj {
+    display: block;
+    margin-bottom: 20px;
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+/* ===========================
+   LISTA DE RESULTADOS COMPACTA
+=========================== */
+#resultadosLista {
+    width: 100%;
+    margin: 20px auto;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(0, 255, 255, 0.07);
+    border: 1px solid #00ffd5;
+    box-shadow: 0 0 12px #00ffe5;
+}
+
+.oculto {
+    display: none;
+}
+
+#tituloResultados {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #9dfff8;
+    text-shadow: 0 0 7px #00fff2;
+}
+
+/* ===========================
+   ITEM DE RESULTADO
+=========================== */
+.itemResultado {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    margin: 6px 0;
+    background: rgba(0, 20, 25, 0.8);
+    border: 1px solid #00ffe1;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.15s;
+    box-shadow: 0 0 10px #00eaff55;
+}
+
+.itemResultado:hover {
+    background: rgba(0, 255, 255, 0.12);
+    transform: scale(1.02);
+    box-shadow: 0 0 15px #00ffea;
+}
+
+.itemIndex {
+    font-size: 18px;
+    font-weight: bold;
+    width: 40px;
+    color: #00ffee;
+    text-shadow: 0 0 10px #00FFF2;
+}
+
+.itemData {
+    text-align: left;
+    font-size: 16px;
+    word-spacing: 2px;
+}
+
+/* ===========================
+   PANEL DE FICHA DETALLADA
+=========================== */
+#detalleRegistro {
+    margin-top: 25px;
+    padding: 18px;
+    border-radius: 10px;
+    background: rgba(0, 60, 70, 0.2);
+    border: 1px solid #00eaff;
+    box-shadow: 0 0 15px #00eaff99;
+}
+
+.fichaTitulo {
+    font-size: 22px;
+    margin-bottom: 12px;
+    text-shadow: 0 0 8px #00ffea;
+}
+
+/* UNA FILA DE LA TABLA DETALLADA */
+.fFila {
+    display: grid;
+    grid-template-columns: 30% 70%;
+    padding: 6px 0;
+    border-bottom: 1px solid #00fff566;
+}
+
+.fCampo {
+    color: #8bffea;
+    text-shadow: 0 0 6px #00ffe1;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 10px;
+}
+
+.fValor {
+    color: #fff;
+    text-align: left;
+}
+
+/* ===========================
+   FOOTER
+=========================== */
 .footer {
     margin-top: 40px;
+    padding: 15px;
     font-size: 13px;
-    color: cyan;
+    opacity: 0.7;
+    color: #8affff;
+    text-shadow: 0 0 7px #00ffea;
 }
