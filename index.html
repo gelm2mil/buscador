@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Buscador PMT | GELM</title>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>Buscador PMT | GELM</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
 <div class="contenedor">
 
+    <!-- TITULO CON LOGOS -->
     <div class="titulo">
         <img src="icons/logo.png" class="logo">
         <h2>MUNICIPALIDAD DE CHIMALTENANGO<br>MULTAS PENDIENTES DE PAGO</h2>
         <h3>Sistema de Consulta — BY GELM</h3>
     </div>
 
+    <!-- ESTADO DEL ARCHIVO -->
     <div id="estado" class="estado">Cargando archivo...</div>
 
-    <!-- BARRA DE BÚSQUEDA -->
+    <!-- BUSQUEDA -->
     <div class="buscadorBox">
         <input id="busquedaInput" type="text" placeholder="Ingresa placa, licencia o documento">
         <button id="btnBuscar">Buscar</button>
@@ -30,13 +32,13 @@
     </small>
 
     <!-- RESULTADOS COMPACTOS -->
-    <div id="resultadosLista">
-        <div id="tituloResultados">Resultados</div>
+    <div id="resultadosLista" class="resultadosLista oculto">
+        <div id="tituloResultados">Resultados encontrados</div>
         <div id="contenidoResultados"></div>
     </div>
 
-    <!-- DETALLE POR CLIC -->
-    <div id="detalleRegistro"></div>
+    <!-- PANEL DE DETALLE -->
+    <div id="detalleRegistro" class="detalle oculto"></div>
 
 </div>
 
