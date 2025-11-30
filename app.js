@@ -1,77 +1,126 @@
-let BD = [];
-const estado = document.getElementById("estado");
-const input = document.getElementById("busquedaInput");
-const btnBuscar = document.getElementById("btnBuscar");
-const listaResultados = document.getElementById("resultadosLista");
-const detalle = document.getElementById("detalleRegistro");
+let registros = [];
+let columnas = [];
 
-// Cargar JSON
-async function cargarJSON() {
-    try {
-        const resp = await fetch("placas.json?noCache=" + Date.now());
-        BD = await resp.json();
-
-        estado.textContent = `Archivo cargado. Registros: ${BD.length}`;
-        estado.style.color = "#00eaff";
-    } catch (err) {
-        estado.textContent = "Error cargando placas.json";
-        estado.style.color = "red";
+// =======================
+// CARGAR JSON AUTOMÁTICAMENTE
+// =======================
+fetch("placas.json")
+    .then(r => r.json())
+    .then(data => {
+        registros = data;
+        columnas = Object.keys(data[0] || {});
+        document.getElementById("estado").innerText =
+            "Archivo cargado. Registros: " + registros.length;
+    })
+    .catch(err => {
         console.error(err);
-    }
-}
+        document.getElementById("estado").innerText = "Error cargando JSON";
+    });
 
-cargarJSON();
+// Normalizar texto
+const clean = t =>
+    t.toString().replace(/\s+/g, "").replace(/-/g, "").toUpperCase();
 
-// Normalización
-function normalizar(txt) {
-    return txt.toString().toLowerCase().replace(/\s|-/g, "");
-}
+// =======================
+// FUNCIÓN PRINCIPAL DE BÚSQUEDA
+// =======================
+document.getElementById("btnBuscar").addEventListener("click", buscar);
 
-// Buscar
 function buscar() {
-    const q = normalizar(input.value);
-    listaResultados.innerHTML = "";
-    detalle.innerHTML = "";
+    const texto = document.getElementById("busquedaInput").value.trim();
+    if (!texto) return;
 
-    if (q.length < 2) return;
+    const limpio = clean(texto);
+    const mayus = texto.toUpperCase();
 
-    const resultados = BD.filter(reg =>
-        Object.values(reg).some(v => normalizar(v ?? "").includes(q))
-    );
+    const cont = document.getElementById("contenidoResultados");
+    cont.innerHTML = "";
 
-    if (resultados.length === 0) {
-        listaResultados.innerHTML = `<div class="itemResultado">Sin resultados…</div>`;
+    let coincidencias = [];
+
+    registros.forEach((reg) => {
+        let prio = 0;
+
+        let placa = reg["placas"] || reg["placa"] || "";
+        let licencia = reg["No. Licencia"] || "";
+        let dpi = reg["dpi"] || "";
+        let documento = reg["documento"] || "";
+        let calcom = reg["No. Calcomania"] || "";
+
+        if (clean(placa) === limpio) prio = 100;
+        if (clean(licencia) === limpio) prio = 90;
+        if (clean(dpi) === limpio) prio = 80;
+        if (clean(documento) === limpio) prio = 70;
+        if (clean(calcom) === limpio) prio = 60;
+
+        if (prio > 0) coincidencias.push({ reg, prio });
+    });
+
+    if (coincidencias.length === 0) {
+        cont.innerHTML = `<div class="noExiste">No encontrado: ${texto}</div>`;
         return;
     }
 
-    resultados.forEach(reg => {
-        const div = document.createElement("div");
-        div.className = "itemResultado";
+    coincidencias.sort((a, b) => b.prio - a.prio);
 
-        const placa = reg["placas"] || reg["NO. PLACA"] || "SIN PLACA";
-        const nombre = reg["nombre del conductor"] || "SIN NOMBRE";
-
-        div.innerHTML = `<b>${placa}</b> — ${nombre}`;
-        div.onclick = () => mostrarDetalle(reg);
-
-        listaResultados.appendChild(div);
+    coincidencias.forEach(obj => {
+        crearTarjeta(obj.reg);
     });
 }
 
-// Mostrar tarjeta detalle
-function mostrarDetalle(reg) {
-    detalle.innerHTML = `
-        <div class="tarjetaDetalle">
-            <h3 style="color:#00eaff;text-shadow:0 0 8px #00eaff">DETALLE COMPLETO</h3>
-            <hr>
-            ${Object.entries(reg).map(([k, v]) =>
-                `<div class="fila"><span class="campo">${k}:</span><span class="valor">${v}</span></div>`
-            ).join("")}
+// =======================
+// TARJETAS PROFESIONALES
+// =======================
+function crearTarjeta(reg) {
+    const cont = document.getElementById("contenidoResultados");
+
+    let placa = reg["placas"] || reg["placa"] || "SIN PLACA";
+    let nombre = reg["nombre del conductor"] || "SIN NOMBRE";
+    let fecha = reg["fecha"] || "";
+    let hora = reg["hora"] || "";
+    let tipo = reg["tipo"] || "";
+
+    let card = document.createElement("div");
+    card.className = "tarjeta";
+
+    card.innerHTML = `
+        <div class="tarjetaHead">
+            <span class="placa">${placa}</span>
+            <span class="info">${tipo} — ${fecha} ${hora}</span>
+        </div>
+
+        <div class="detalle" style="display:none;">
+            ${generarDetalle(reg)}
         </div>
     `;
 
-    detalle.scrollIntoView({ behavior: "smooth" });
+    // Abrir/cerrar detalle
+    card.querySelector(".tarjetaHead").addEventListener("click", () => {
+        let d = card.querySelector(".detalle");
+        d.style.display = d.style.display === "none" ? "block" : "none";
+    });
+
+    cont.appendChild(card);
 }
 
-btnBuscar.onclick = buscar;
-input.addEventListener("keyup", e => { if (e.key === "Enter") buscar(); });
+// =======================
+// DETALLE LIMPIO
+// =======================
+function generarDetalle(reg) {
+    let html = `<div class="detalleBox">`;
+
+    columnas.forEach(c => {
+        let valor = reg[c];
+        if (valor === null || valor === "" || c.includes("Unnamed")) return;
+
+        html += `
+            <div class="fila">
+                <span class="campo">${c}:</span>
+                <span class="valor">${valor}</span>
+            </div>
+        `;
+    });
+
+    html += "</div>";
+    return html;
+}
