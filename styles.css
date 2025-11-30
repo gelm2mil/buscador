@@ -1,173 +1,81 @@
 body {
-    background: radial-gradient(circle at top, #0a0f2b, #02010f 70%);
-    font-family: Arial, sans-serif;
-    color: #cfffff;
+    background: #05010d;
+    font-family: Arial;
+    color: white;
     text-align: center;
 }
 
 .contenedor {
-    width: 85%;
+    max-width: 900px;
     margin: auto;
-    padding-top: 20px;
+    padding: 20px;
 }
 
 .logo {
-    width: 130px;
-    margin-bottom: 10px;
-    filter: drop-shadow(0 0 15px #00ffe7);
+    width: 110px;
+    filter: drop-shadow(0 0 8px cyan);
 }
 
 .titulo h2 {
-    font-size: 26px;
-    text-shadow: 0 0 12px #00eaff;
+    color: #00eaff;
+    text-shadow: 0 0 10px cyan;
 }
 
 .titulo h3 {
-    font-size: 18px;
-    color: #78f5ff;
-    margin-top: -10px;
+    color: #b0fbff;
 }
 
-/* Estado de carga */
-.estado {
-    margin-top: 10px;
-    font-size: 15px;
-    color: #33eeff;
-}
-
-/* BARRA DE BÚSQUEDA NEÓN */
-.barraBusqueda {
+.buscador input {
     width: 60%;
-    margin: 20px auto;
-    padding: 15px;
-    background: #00111a;
-    border-radius: 15px;
-    box-shadow: 0 0 18px #00eaff;
+    padding: 10px;
+    border-radius: 10px;
 }
 
-.barraBusqueda input {
-    width: 70%;
-    padding: 11px;
-    border-radius: 10px;
+.buscador button {
+    padding: 10px 20px;
+    background: cyan;
     border: none;
-    outline: none;
-    font-size: 16px;
-}
-
-.barraBusqueda button {
-    padding: 11px 30px;
     border-radius: 10px;
-    border: none;
-    background: #00eaff;
-    color: #00111a;
     cursor: pointer;
-    font-size: 15px;
     font-weight: bold;
-    transition: 0.3s;
-}
-
-.barraBusqueda button:hover {
-    background: #008ab5;
-}
-
-/* LISTA DE RESULTADOS NEÓN */
-.listaNeon {
-    width: 80%;
-    margin: auto;
-    margin-top: 20px;
 }
 
 .itemResultado {
-    background: #000;
-    margin: 6px auto;
-    padding: 12px;
-    width: 85%;
-    border-radius: 8px;
-    cursor: pointer;
-    color: #00f2ff;
-    font-weight: bold;
-    border: 1px solid #00eaff55;
-    box-shadow: 0 0 10px #00eaff44;
-    transition: 0.25s;
-}
-
-.itemResultado:hover {
-    background: #00222c;
-    box-shadow: 0 0 15px #00f6ff;
-    transform: scale(1.03);
-}
-
-/* TARJETA DETALLE */
-.detalleNeon {
-    margin-top: 25px;
-    width: 90%;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.tarjetaDetalle {
-    background: #000814;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 0 20px #00eaff88;
-    border: 1px solid #00eaff55;
-    text-align: left;
-}
-
-.fila {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    border-bottom: 1px solid #003644;
-}
-
-.campo {
-    font-weight: bold;
-    color: #00f2ff;
-}
-
-.valor {
-    color: #baffff;
-}
-.tarjeta {
-    background: rgba(0,0,0,0.65);
-    border: 1px solid #00f2ff;
-    margin: 10px 0;
-    border-radius: 10px;
+    background: rgba(0,255,255,0.1);
+    border: 1px solid cyan;
     padding: 10px;
-    color: aqua;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.tarjeta:hover {
-    box-shadow: 0 0 12px #00ffe0;
-}
-
-.tarjetaHead {
-    font-size: 18px;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-}
-
-.detalleBox {
     margin-top: 10px;
-    background: #020b22;
-    padding: 10px;
+    border-radius: 10px;
+}
+
+.resPlaca {
+    font-size: 20px;
+    font-weight: bold;
+    color: cyan;
+}
+
+.btnVer {
+    margin-top: 10px;
+    padding: 6px 14px;
     border-radius: 8px;
+    border: 1px solid cyan;
+    background: transparent;
+    color: cyan;
+    cursor: pointer;
 }
 
-.fila {
-    padding: 4px 0;
-    border-bottom: 1px solid #004455;
+.detalleTitulo {
+    margin-top: 40px;
+    font-size: 24px;
+    color: cyan;
 }
 
-.campo {
-    color: #9bfaff;
+.detalleCaja {
+    text-align: left;
+    margin: auto;
+    max-width: 600px;
+    background: rgba(0,0,0,0.6);
+    padding: 20px;
+    border: 1px solid cyan;
+    border-radius: 10px;
 }
-
-.valor {
-    color: #ffffff;
-}
-
