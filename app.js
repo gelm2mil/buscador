@@ -1,5 +1,5 @@
 // =============================
-//  CONFIGURACIÓN GENERAL
+//  CARGA DEL JSON
 // =============================
 let datos = [];
 let resultadosActuales = [];
@@ -11,9 +11,7 @@ const resultadoEl = document.getElementById("resultado");
 const similaresBox = document.getElementById("similaresBox");
 const similaresSelect = document.getElementById("similaresSelect");
 
-// =============================
-//  CARGAR JSON
-// =============================
+// ====== Cargar JSON ======
 fetch("placas.json")
   .then(res => res.json())
   .then(json => {
@@ -26,7 +24,7 @@ fetch("placas.json")
   });
 
 // =============================
-//  NORMALIZAR TEXTO
+//  NORMALIZADOR
 // =============================
 function normalizar(txt) {
   return String(txt || "")
@@ -39,29 +37,40 @@ function normalizar(txt) {
 // =============================
 //  ALIAS INTELIGENTES
 // =============================
-const aliases = {
-  placa: ["placa", "placas", "numplaca", "nop", "numeroplaca"],
-  dpi: ["dpi", "documento", "nodocumento"],
-  licencia: ["licencia", "nolicencia", "numlicencia", "lic"],
-  boleta: ["boleta", "noboleta", "numeroboleta"],
-  conductor: ["conductor", "nombre", "nombredelconductor"],
+const aliasProfesionales = {
+  placa: ["placa", "placas", "no placa", "numplaca", "noplaca"],
+  piloto: ["piloto", "conductor", "nombre", "nombrecompleto"],
+  concesionario: ["concesionario", "propietario", "dueño", "dueno"],
+  telefono: ["telefono", "tel", "numtelefono"],
+  dpi: ["dpi", "documento"],
+  licencia: ["licencia", "nolicencia"],
+  boleta: ["boleta", "noboleta"],
+  articulo: ["articulo", "faltas"],
+  tipo: ["tipo", "clase"],
+  marca: ["marca"],
+  color: ["color"],
+  ruta: ["ruta", "zona", "sector"],
   direccion: ["direccion", "ubicacion", "dir"],
-  articulo: ["articulo", "faltas", "art"],
+  serie: ["serie"],
 };
 
-// Encontrar columna por alias
+// ====== Detectar campo según alias ======
 function matchField(key) {
-  const cleanKey = normalizar(key);
-  for (let campo in aliases) {
-    for (let alias of aliases[campo]) {
-      if (cleanKey.includes(normalizar(alias))) return campo;
+  const clean = normalizacionClave(key);
+  for (let campo in aliasProfesionales) {
+    for (let a of aliasProfesionales[campo]) {
+      if (clean.includes(normalizacionClave(a))) return campo;
     }
   }
-  return key;
+  return null;
+}
+
+function normalizacionClave(t) {
+  return t.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 // =============================
-//  BÚSQUEDA ULTRA COMPLETA
+// BÚSQUEDA
 // =============================
 function buscar() {
   if (datos.length === 0) {
@@ -77,16 +86,16 @@ function buscar() {
 
   const qNorm = normalizar(q);
 
-  const resultados = datos.filter(row => {
+  const encontrados = datos.filter(row => {
     const texto = Object.values(row).join(" ");
     return normalizar(texto).includes(qNorm);
   });
 
-  mostrarResultados(resultados);
+  mostrarResultados(encontrados);
 }
 
 // =============================
-//  MOSTRAR RESULTADOS
+// MOSTRAR RESULTADOS
 // =============================
 function mostrarResultados(lista) {
   resultadosActuales = lista;
@@ -100,61 +109,67 @@ function mostrarResultados(lista) {
   }
 
   if (lista.length === 1) {
-    resultadoEl.innerHTML = generarTarjeta(lista[0]);
+    resultadoEl.innerHTML = generarTarjetaProfesional(lista[0]);
     return;
   }
 
   similaresBox.classList.remove("oculto");
 
-  lista.forEach((row, idx) => {
-    const placa = row.placa || row.placas || "N/D";
-    const dpi   = row.dpi || row.documento || "";
-    const lic   = row.licencia || row.no_licencia || "";
+  lista.forEach((r, i) => {
+    const placa = r.placa || r.placas || "N/D";
+    const dpi = r.dpi || r.documento || "";
+    const pil = r.piloto || "";
 
-    const opcion = [placa, dpi, lic].filter(Boolean).join(" — ");
+    const texto = [placa, dpi, pil].filter(Boolean).join(" — ");
 
     const opt = document.createElement("option");
-    opt.value = idx;
-    opt.textContent = opcion || `Registro ${idx + 1}`;
+    opt.value = i;
+    opt.textContent = texto;
     similaresSelect.appendChild(opt);
   });
 
-  resultadoEl.innerHTML = generarTarjeta(lista[0]);
+  resultadoEl.innerHTML = generarTarjetaProfesional(lista[0]);
 }
 
 // =============================
-//  GENERAR TARJETA PROFESIONAL
+// TARJETA ESTILO PMT PROFESIONAL
 // =============================
-function generarTarjeta(row) {
-  const datosLimpios = {};
+function generarTarjetaProfesional(row) {
+  const limpio = {};
 
-  // Detectar campos por alias
+  // Convertir claves usando alias
   for (let key in row) {
     const campo = matchField(key);
-    datosLimpios[campo] = row[key];
+    if (campo) limpio[campo] = row[key];
   }
 
+  // FORMATO DE TARJETA VISUAL
   let html = `<div class="tarjeta">`;
 
-  for (let campo in datosLimpios) {
-    html += `<div class="campo"><b>${campo.toUpperCase()}:</b> ${datosLimpios[campo]}</div>`;
-  }
+  const orden = [
+    "placa", "piloto", "concesionario", "telefono",
+    "dpi", "licencia", "boleta", "articulo",
+    "tipo", "marca", "color", "serie", "ruta", "direccion"
+  ];
+
+  orden.forEach(campo => {
+    if (limpio[campo]) {
+      html += `<div class="campo"><b>${campo.toUpperCase()}:</b> ${limpio[campo]}</div>`;
+    }
+  });
 
   html += `</div>`;
   return html;
 }
 
 // =============================
-//  EVENTOS
+// EVENTOS
 // =============================
 btnBuscar.addEventListener("click", buscar);
-
-inputEl.addEventListener("keydown", e => {
-  if (e.key === "Enter") buscar();
-});
+inputEl.addEventListener("keydown", e => { if (e.key === "Enter") buscar(); });
 
 similaresSelect.addEventListener("change", () => {
   const idx = similaresSelect.value;
   if (idx === "") return;
-  resultadoEl.innerHTML = generarTarjeta(resultadosActuales[idx]);
+  resultadoEl.innerHTML = generarTarjetaProfesional(resultadosActuales[idx]);
 });
