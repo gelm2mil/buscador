@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Buscador PMT | GELM</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<title>Buscador PMT | GELM</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
 <div class="contenedor">
 
-    <!-- TITULO CON LOGOS -->
     <div class="titulo">
-        <img src="icons/logo.png" class="logo">
-        <h2>MUNICIPALIDAD DE CHIMALTENANGO<br>MULTAS PENDIENTES DE PAGO</h2>
+        <img src="icons/MUNI.jpg" class="logo">
+        <h2>MUNICIPALIDAD DE CHIMALTENANGO<br>
+        MULTAS PENDIENTES DE PAGO</h2>
         <h3>Sistema de Consulta — BY GELM</h3>
     </div>
 
-    <!-- ESTADO DEL ARCHIVO -->
     <div id="estado" class="estado">Cargando archivo...</div>
 
-    <!-- BUSQUEDA -->
-    <div class="buscadorBox">
-        <input id="busquedaInput" type="text" placeholder="Ingresa placa, licencia o documento">
+    <!-- BUSCADOR ESTILO NEÓN -->
+    <div class="barraBusqueda">
+        <input id="busquedaInput" type="text" placeholder="Ingresa placa, licencia, DPI o documento">
         <button id="btnBuscar">Buscar</button>
     </div>
 
@@ -31,14 +30,11 @@
         1918619070805 = 1918619070805 — M-098HJX = M098HJX
     </small>
 
-    <!-- RESULTADOS COMPACTOS -->
-    <div id="resultadosLista" class="resultadosLista oculto">
-        <div id="tituloResultados">Resultados encontrados</div>
-        <div id="contenidoResultados"></div>
-    </div>
+    <!-- CONTENEDOR DE RESULTADOS (LISTA NEÓN) -->
+    <div id="resultadosLista" class="listaNeon"></div>
 
-    <!-- PANEL DE DETALLE -->
-    <div id="detalleRegistro" class="detalle oculto"></div>
+    <!-- DETALLE DEL REGISTRO -->
+    <div id="detalleRegistro" class="detalleNeon"></div>
 
 </div>
 
