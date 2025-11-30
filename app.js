@@ -1,98 +1,134 @@
-// ================== CARGA DEL JSON ==================
-let datos = [];
+// ================================
+// 📌 CARGA DEL ARCHIVO JSON
+// ================================
+let baseDatos = [];
 
-const estadoEl = document.getElementById("estado");
-const inputEl  = document.getElementById("busquedaInput");
-const btnBuscar = document.getElementById("btnBuscar");
+async function cargarDatos() {
+    try {
+        const respuesta = await fetch("placas.json");
+        baseDatos = await respuesta.json();
 
-fetch("placas.json")
-    .then(res => res.json())
-    .then(json => {
-        datos = json;
-        estadoEl.textContent = "Archivo cargado ✔️";
-    })
-    .catch(() => estadoEl.textContent = "Error cargando archivo ❌");
+        document.getElementById("estado").innerHTML =
+            "Archivo cargado. Registros: " + baseDatos.length;
+    } catch (error) {
+        document.getElementById("estado").innerHTML =
+            "❌ Error cargando archivo";
+        console.error("Error cargando placas.json", error);
+    }
+}
+cargarDatos();
 
-
-// ================== NORMALIZAR ==================
+// ================================
+// 📌 NORMALIZAR TEXTO (quita guiones, espacios, mayúsculas)
+// ================================
 function normalizar(txt) {
-    return String(txt || "")
-        .toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .replace(/\s+/g, "")
-        .replace(/[-_.]/g, "");
+    return txt
+        .toString()
+        .trim()
+        .toUpperCase()
+        .replace(/[\s\-]/g, "");
 }
 
+// ================================
+// 📌 BOTÓN BUSCAR
+// ================================
+document.getElementById("btnBuscar").addEventListener("click", buscar);
 
-// ================== BUSCAR ==================
-function buscar() {
-    const q = inputEl.value.trim();
-    if (q.length < 2) {
-        alert("Ingrese mínimo 2 caracteres.");
-        return;
-    }
-
-    const qNorm = normalizar(q);
-
-    const encontrados = datos.filter(row =>
-        Object.values(row).some(col => normalizar(col).includes(qNorm))
-    );
-
-    mostrarListaCompacta(encontrados);
-}
-
-
-// ================== LISTA COMPACTA ==================
-function mostrarListaCompacta(lista) {
-    const panel = document.getElementById("resultadosLista");
-    const cont = document.getElementById("contenidoResultados");
-    const det = document.getElementById("detalleRegistro");
-
-    cont.innerHTML = "";
-    det.style.display = "none";
-    panel.style.display = "none";
-
-    if (lista.length === 0) {
-        panel.style.display = "block";
-        cont.innerHTML = "<div style='color:red'>❌ Sin resultados</div>";
-        return;
-    }
-
-    document.getElementById("tituloResultados").textContent =
-        `Resultados encontrados: ${lista.length}`;
-
-    lista.forEach(registro => {
-        const linea = document.createElement("div");
-        linea.classList.add("lineaRegistro");
-        linea.textContent = Object.values(registro).join(" | ");
-        linea.onclick = () => mostrarDetalle(registro);
-        cont.appendChild(linea);
+// ENTER también busca
+document
+    .getElementById("busquedaInput")
+    .addEventListener("keypress", function (e) {
+        if (e.key === "Enter") buscar();
     });
 
-    panel.style.display = "block";
+// ================================
+// 📌 FUNCIÓN PRINCIPAL DE BÚSQUEDA
+// ================================
+function buscar() {
+    const entrada = normalizar(
+        document.getElementById("busquedaInput").value
+    );
+
+    if (entrada === "") return;
+
+    const resultados = [];
+
+    baseDatos.forEach((fila, index) => {
+        const valoresFila = Object.values(fila).map(v => normalizar(v));
+
+        if (valoresFila.some(v => v.includes(entrada))) {
+            resultados.push({ index, fila });
+        }
+    });
+
+    mostrarResultados(resultados);
 }
 
+// ================================
+// 📌 MOSTRAR RESULTADOS EN LISTA COMPACTA
+// ================================
+function mostrarResultados(resultados) {
+    const contenedor = document.getElementById("contenidoResultados");
+    const panel = document.getElementById("resultadosLista");
+    const detalle = document.getElementById("detalleRegistro");
 
-// ================== DETALLE ==================
-function mostrarDetalle(registro) {
+    detalle.classList.add("oculto");
+
+    contenedor.innerHTML = "";
+
+    if (resultados.length === 0) {
+        panel.classList.remove("oculto");
+        contenedor.innerHTML = `<div class="itemNo">❌ No se encontraron coincidencias</div>`;
+        return;
+    }
+
+    panel.classList.remove("oculto");
+
+    resultados.forEach((r, i) => {
+        const placa = r.fila["placas"] || r.fila["PLACA"] || "SIN DATOS";
+        const fecha = r.fila["fecha"] || r.fila["FECHA"] || "";
+        const hora = r.fila["hora"] || r.fila["HORA"] || "";
+
+        const item = document.createElement("div");
+        item.className = "itemResultado";
+        item.innerHTML = `
+            <div class="itemIndex">${i + 1}</div>
+            <div class="itemData">
+                <b>${placa}</b> — ${fecha} ${hora}
+            </div>
+        `;
+
+        item.addEventListener("click", () => mostrarDetalle(r.fila));
+
+        contenedor.appendChild(item);
+    });
+}
+
+// ================================
+// 📌 MOSTRAR DETALLE COMPLETO TIPO FICHA PROFESIONAL
+// ================================
+function mostrarDetalle(fila) {
     const panel = document.getElementById("detalleRegistro");
     panel.innerHTML = "";
+    panel.classList.remove("oculto");
 
-    for (let [key, val] of Object.entries(registro)) {
-        panel.innerHTML += `
-            <div class="detCampo">
-                <b>${key.toUpperCase()}:</b> ${val || "—"}
+    let html = `
+        <div class="ficha">
+            <h3 class="fichaTitulo">DETALLE DEL REGISTRO</h3>
+    `;
+
+    for (const [campo, valor] of Object.entries(fila)) {
+        html += `
+            <div class="fFila">
+                <div class="fCampo">${campo}</div>
+                <div class="fValor">${valor}</div>
             </div>
         `;
     }
 
-    panel.style.display = "block";
+    html += `</div>`;
+
+    panel.innerHTML = html;
+
+    panel.scrollIntoView({ behavior: "smooth" });
 }
-
-
-// ================== EVENTOS ==================
-btnBuscar.addEventListener("click", buscar);
-
-inputEl.addEventListener("keydown", e => {
-    if (e.key === "Enter") buscar();
-});
