@@ -1,134 +1,85 @@
-// ================================
-// 📌 CARGA DEL ARCHIVO JSON
-// ================================
-let baseDatos = [];
+let BD = [];
+const estado = document.getElementById("estado");
+const input = document.getElementById("busquedaInput");
+const btnBuscar = document.getElementById("btnBuscar");
+const listaResultados = document.getElementById("contenidoResultados");
+const detalle = document.getElementById("detalleRegistro");
 
-async function cargarDatos() {
+// Cargar JSON
+async function cargarJSON() {
     try {
-        const respuesta = await fetch("placas.json");
-        baseDatos = await respuesta.json();
+        const resp = await fetch("placas.json?nocache=" + Date.now());
+        BD = await resp.json();
 
-        document.getElementById("estado").innerHTML =
-            "Archivo cargado. Registros: " + baseDatos.length;
-    } catch (error) {
-        document.getElementById("estado").innerHTML =
-            "❌ Error cargando archivo";
-        console.error("Error cargando placas.json", error);
+        estado.textContent = `Archivo cargado. Registros: ${BD.length}`;
+        estado.style.color = "#00eaff";
+    } catch (err) {
+        estado.textContent = "Error cargando placas.json";
+        estado.style.color = "red";
+        console.error(err);
     }
 }
-cargarDatos();
 
-// ================================
-// 📌 NORMALIZAR TEXTO (quita guiones, espacios, mayúsculas)
-// ================================
+cargarJSON();
+
+// Normalizar texto para búsquedas
 function normalizar(txt) {
-    return txt
-        .toString()
-        .trim()
-        .toUpperCase()
-        .replace(/[\s\-]/g, "");
+    return txt.toString().toLowerCase().replace(/\s|-/g, "");
 }
 
-// ================================
-// 📌 BOTÓN BUSCAR
-// ================================
-document.getElementById("btnBuscar").addEventListener("click", buscar);
-
-// ENTER también busca
-document
-    .getElementById("busquedaInput")
-    .addEventListener("keypress", function (e) {
-        if (e.key === "Enter") buscar();
-    });
-
-// ================================
-// 📌 FUNCIÓN PRINCIPAL DE BÚSQUEDA
-// ================================
+// Buscar registros
 function buscar() {
-    const entrada = normalizar(
-        document.getElementById("busquedaInput").value
-    );
+    const q = normalizar(input.value);
+    listaResultados.innerHTML = "";
+    detalle.innerHTML = "";
 
-    if (entrada === "") return;
+    if (q.length < 2) return;
 
-    const resultados = [];
-
-    baseDatos.forEach((fila, index) => {
-        const valoresFila = Object.values(fila).map(v => normalizar(v));
-
-        if (valoresFila.some(v => v.includes(entrada))) {
-            resultados.push({ index, fila });
-        }
+    const resultados = BD.filter(reg => {
+        return Object.values(reg).some(v =>
+            normalizar(v ?? "").includes(q)
+        );
     });
-
-    mostrarResultados(resultados);
-}
-
-// ================================
-// 📌 MOSTRAR RESULTADOS EN LISTA COMPACTA
-// ================================
-function mostrarResultados(resultados) {
-    const contenedor = document.getElementById("contenidoResultados");
-    const panel = document.getElementById("resultadosLista");
-    const detalle = document.getElementById("detalleRegistro");
-
-    detalle.classList.add("oculto");
-
-    contenedor.innerHTML = "";
 
     if (resultados.length === 0) {
-        panel.classList.remove("oculto");
-        contenedor.innerHTML = `<div class="itemNo">❌ No se encontraron coincidencias</div>`;
+        listaResultados.innerHTML = `<div class="itemResultado">Sin resultados…</div>`;
         return;
     }
 
-    panel.classList.remove("oculto");
-
-    resultados.forEach((r, i) => {
-        const placa = r.fila["placas"] || r.fila["PLACA"] || "SIN DATOS";
-        const fecha = r.fila["fecha"] || r.fila["FECHA"] || "";
-        const hora = r.fila["hora"] || r.fila["HORA"] || "";
-
-        const item = document.createElement("div");
-        item.className = "itemResultado";
-        item.innerHTML = `
-            <div class="itemIndex">${i + 1}</div>
-            <div class="itemData">
-                <b>${placa}</b> — ${fecha} ${hora}
-            </div>
+    resultados.forEach((reg, i) => {
+        const div = document.createElement("div");
+        div.className = "itemResultado";
+        div.innerHTML = `
+            <b>${reg["placas"] ?? reg["NO. PLACA"] ?? "SIN PLACA"}</b>
+            — ${reg["nombre del conductor"] || "SIN NOMBRE"}
         `;
-
-        item.addEventListener("click", () => mostrarDetalle(r.fila));
-
-        contenedor.appendChild(item);
+        div.onclick = () => mostrarDetalle(reg);
+        listaResultados.appendChild(div);
     });
 }
 
-// ================================
-// 📌 MOSTRAR DETALLE COMPLETO TIPO FICHA PROFESIONAL
-// ================================
-function mostrarDetalle(fila) {
-    const panel = document.getElementById("detalleRegistro");
-    panel.innerHTML = "";
-    panel.classList.remove("oculto");
-
-    let html = `
-        <div class="ficha">
-            <h3 class="fichaTitulo">DETALLE DEL REGISTRO</h3>
+// Mostrar detalle expandido
+function mostrarDetalle(reg) {
+    detalle.innerHTML = `
+        <div class="tarjetaDetalle">
+            <h3>Detalle completo</h3>
+            <hr>
+            ${Object.entries(reg)
+                .map(([k, v]) => `
+                    <div class="fila">
+                        <span class="campo">${k}:</span>
+                        <span class="valor">${v}</span>
+                    </div>
+                `)
+                .join("")}
+        </div>
     `;
 
-    for (const [campo, valor] of Object.entries(fila)) {
-        html += `
-            <div class="fFila">
-                <div class="fCampo">${campo}</div>
-                <div class="fValor">${valor}</div>
-            </div>
-        `;
-    }
-
-    html += `</div>`;
-
-    panel.innerHTML = html;
-
-    panel.scrollIntoView({ behavior: "smooth" });
+    detalle.scrollIntoView({ behavior: "smooth" });
 }
+
+// Eventos
+btnBuscar.onclick = buscar;
+input.addEventListener("keyup", e => {
+    if (e.key === "Enter") buscar();
+});
