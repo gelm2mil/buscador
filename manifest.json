@@ -1,11 +1,9 @@
 {
-  "name": "GELM 2026 — PMT Chimaltenango",
-  "short_name": "GELM 2026",
-  "description": "Sistema profesional de agenda, operativos, denuncias y control de servicios.",
+  "name": "GELM — Sistema PMT 2026",
+  "short_name": "PMT 2026",
   "start_url": "index.html",
-  "scope": "./",
   "display": "standalone",
-  "background_color": "#000010",
+  "background_color": "#000000",
   "theme_color": "#00eaff",
   "icons": [
     {
