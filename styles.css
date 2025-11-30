@@ -129,3 +129,45 @@ body {
 .valor {
     color: #baffff;
 }
+.tarjeta {
+    background: rgba(0,0,0,0.65);
+    border: 1px solid #00f2ff;
+    margin: 10px 0;
+    border-radius: 10px;
+    padding: 10px;
+    color: aqua;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.tarjeta:hover {
+    box-shadow: 0 0 12px #00ffe0;
+}
+
+.tarjetaHead {
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+}
+
+.detalleBox {
+    margin-top: 10px;
+    background: #020b22;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.fila {
+    padding: 4px 0;
+    border-bottom: 1px solid #004455;
+}
+
+.campo {
+    color: #9bfaff;
+}
+
+.valor {
+    color: #ffffff;
+}
+
