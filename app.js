@@ -34,39 +34,65 @@ function buscar() {
 
     if (!txt) return;
 
-    // buscar por placa
-    const multas = registros.filter(r => clean(r.placas) === limpio);
+    const encontrados = registros.filter(r =>
+        clean(r.placas) === limpio ||
+        clean(r["No. Licencia"]) === limpio ||
+        clean(r.lic) === limpio ||
+        clean(r.documento || "") === limpio
+    );
 
-    if (multas.length === 0) {
+    if (encontrados.length === 0) {
         lista.innerHTML = `<div class="noResult">Sin resultados para: ${txt}</div>`;
         return;
     }
 
-    // GENERAR TARJETA PRINCIPAL
-    const placa = multas[0].placas;
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "itemResultado";
+    encontrados.forEach((r, idx) => {
+        const div = document.createElement("div");
+        div.className = "itemResultado";
 
-    tarjeta.innerHTML = `
-        <div class="resPlaca">${placa}</div>
-        <div class="resMini">Multas encontradas: ${multas.length}</div>
-        <div id="listaMultas"></div>
-    `;
-
-    lista.appendChild(tarjeta);
-
-    // LISTA DE TODAS LAS MULTAS
-    const contenedorLista = tarjeta.querySelector("#listaMultas");
-
-    multas.forEach(m => {
-        const item = document.createElement("div");
-        item.className = "lineaMulta";
-
-        item.innerHTML = `
-            • Boleta ${m["No. Boleta"]} | Art: ${m.articulo} | 
-              ${m.tipo} | ${m.marca} | ${m.hora} | Chapa: ${m.chapa}
+        div.innerHTML = `
+            <div class="resPlaca">${r.placas}</div>
+            <div class="resMini">
+                Boleta: ${r["No. Boleta"]} — Art: ${r.articulo}
+            </div>
+            <button class="btnVer" onclick="mostrarDetalle(${idx})">Ver detalle</button>
         `;
 
-        contenedorLista.appendChild(item);
+        lista.appendChild(div);
     });
+
+    // Guardamos para acceder por índice
+    window._cacheResultados = encontrados;
+}
+
+function mostrarDetalle(i) {
+    const r = window._cacheResultados[i];
+    if (!r) return;
+
+    const detalle = document.getElementById("detalleRegistro");
+
+    detalle.innerHTML = `
+        <h3 class="detalleTitulo">DETALLE COMPLETO</h3>
+        <div class="detalleCaja">
+
+            <p><b>Placa:</b> ${r.placas}</p>
+            <p><b>No. Boleta:</b> ${r["No. Boleta"]}</p>
+            <p><b>Fecha:</b> ${r.fecha}</p>
+            <p><b>Hora:</b> ${r.hora}</p>
+            <p><b>Tipo:</b> ${r.tipo}</p>
+            <p><b>Marca:</b> ${r.marca}</p>
+            <p><b>Color:</b> ${r.color}</p>
+            <p><b>Dirección:</b> ${r.direccion}</p>
+            <p><b>Departamento:</b> ${r.departamento}</p>
+            <p><b>Municipio:</b> ${r.Municipio}</p>
+            <p><b>Conductor:</b> ${r["nombre del conductor"]}</p>
+            <p><b>Licencia:</b> ${r.lic} — ${r["No. Licencia"]}</p>
+            <p><b>Artículo:</b> ${r.articulo}</p>
+            <p><b>Descripción:</b> ${r.descripcion}</p>
+            <p><b>Chapa:</b> ${r.chapa}</p>
+
+        </div>
+    `;
+
+    detalle.scrollIntoView({ behavior: "smooth" });
 }
