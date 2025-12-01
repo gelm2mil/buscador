@@ -1,77 +1,70 @@
-// ============================================================
-//  BUSCADOR PMT 2025 — BY GELM — VERSION JSON OPTIMIZADA
-// ============================================================
-
+// ==================== CONFIG ====================
 const DATA_URL = "https://raw.githubusercontent.com/gelm2mil/buscador/main/placas.json";
 
 let registros = [];
 let similares = [];
 
-// ============================================================
-//  CARGAR ARCHIVO JSON
-// ============================================================
-async function cargarJSON() {
-    const estado = document.getElementById("estado");
+document.addEventListener("DOMContentLoaded", cargarJSON);
 
+// ==================== CARGAR JSON ====================
+async function cargarJSON() {
     try {
-        estado.textContent = "Cargando archivo JSON...";
+        document.getElementById("estado").textContent = "Cargando archivo JSON...";
 
         const resp = await fetch(DATA_URL, { cache: "no-store" });
         if (!resp.ok) throw new Error("No se pudo descargar placas.json");
 
         registros = await resp.json();
 
-        estado.textContent = "Archivo cargado. Registros: " + registros.length;
+        document.getElementById("estado").textContent =
+            "Archivo cargado correctamente. Registros: " + registros.length;
+
     } catch (err) {
         console.error(err);
-        estado.textContent = "Error: " + err.message;
+        document.getElementById("estado").textContent = "Error: " + err.message;
     }
 }
 
-// Normalizar texto para búsquedas (quita espacios, guiones y pone mayúsculas)
+// ==================== FUNCIONES ====================
 function normalizar(txt) {
-    if (!txt) return "";
-    return txt.toString().replace(/\s+/g, "").replace(/-/g, "").trim().toUpperCase();
+    return txt.toString()
+        .replace(/\s+/g, "")
+        .replace(/-/g, "")
+        .toUpperCase()
+        .trim();
 }
 
-// Escape básico para HTML
 function esc(str) {
-    return str
-        .toString()
+    return str.toString()
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
 }
 
-// ============================================================
-//  TABLA HTML DEL RESULTADO PRINCIPAL
-// ============================================================
+// ==================== TABLA ====================
 function construirTabla(r) {
-    if (!r) return "";
-
     return `
         <table>
             <tr>
-                <th>Serie</th>
-                <th>No. Boleta</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Placa</th>
-                <th>Tipo</th>
-                <th>Marca</th>
-                <th>Color</th>
-                <th>Dirección</th>
-                <th>Departamento</th>
-                <th>Municipio</th>
-                <th>Conductor</th>
-                <th>Lic.</th>
-                <th>No. Licencia</th>
-                <th>Artículo</th>
-                <th>Descripción</th>
-                <th>Chapa</th>
+                <th>SERIE</th>
+                <th>BOLETA</th>
+                <th>FECHA</th>
+                <th>HORA</th>
+                <th>PLACA</th>
+                <th>TIPO</th>
+                <th>MARCA</th>
+                <th>COLOR</th>
+                <th>DIRECCIÓN</th>
+                <th>DEPARTAMENTO</th>
+                <th>MUNICIPIO</th>
+                <th>CONDUCTOR</th>
+                <th>LIC</th>
+                <th>No. LICENCIA</th>
+                <th>ARTÍCULO</th>
+                <th>DESCRIPCIÓN</th>
+                <th>CHAPA</th>
             </tr>
-
             <tr>
                 <td>${esc(r.serie)}</td>
                 <td>${esc(r.boleta)}</td>
@@ -95,65 +88,36 @@ function construirTabla(r) {
     `;
 }
 
-// ============================================================
-//  BUSCAR
-// ============================================================
+// ==================== BUSCADOR ====================
 function buscar() {
     const texto = document.getElementById("busquedaInput").value.trim();
     const limpio = normalizar(texto);
+    const valor = texto.toUpperCase();
 
     const divPrincipal = document.getElementById("resultado-principal");
-    const divSimilares = document.getElementById("similares-contenedor");
+    const divSim = document.getElementById("similares-contenedor");
 
-    divSimilares.innerHTML = "";
+    divSim.innerHTML = "";
     similares = [];
 
     if (!texto) {
-        divPrincipal.innerHTML = "<p>Escribe un dato para buscar.</p>";
+        divPrincipal.innerHTML = "<p>Ingrese una búsqueda válida.</p>";
         return;
     }
 
-    // Buscamos coincidencias en todos los campos
     const coincidencias = [];
 
-    registros.forEach((reg) => {
-        let prioridad = 0;
+    registros.forEach(reg => {
+        let p = 0;
 
-        const campos = [
-            reg.serie,
-            reg.boleta,
-            reg.fecha,
-            reg.fecha2,
-            reg.hora,
-            reg.placa,
-            reg.tipo,
-            reg.marca,
-            reg.color,
-            reg.direccion,
-            reg.departamento,
-            reg.municipio,
-            reg.conductor,
-            reg.licTipo,
-            reg.licencia,
-            reg.articulo,
-            reg.descripcion,
-            reg.chapa
-        ];
+        if (normalizar(reg.chapa) === limpio) p = 110;
+        if (normalizar(reg.placa) === limpio) p = 100;
+        if (normalizar(reg.licencia) === limpio) p = 90;
+        if (normalizar(reg.boleta) === limpio) p = 80;
+        if (normalizar(reg.dpi) === limpio) p = 70;
+        if (normalizar(reg.descripcion).includes(limpio)) p = 60;
 
-        // Normalizar cada campo
-        const camposNormalizados = campos.map(c => normalizar(c));
-
-        // Prioridades fuertes
-        if (normalizar(reg.placa) === limpio) prioridad = 100;
-        else if (normalizar(reg.licencia) === limpio) prioridad = 95;
-        else if (normalizar(reg.boleta) === limpio) prioridad = 90;
-        else if (camposNormalizados.includes(limpio)) prioridad = 70;
-
-        // Coincidencias parciales
-        if (reg.descripcion && reg.descripcion.toUpperCase().includes(texto.toUpperCase()))
-            prioridad = Math.max(prioridad, 40);
-
-        if (prioridad > 0) coincidencias.push({ reg, prioridad });
+        if (p > 0) coincidencias.push({ reg, p });
     });
 
     if (coincidencias.length === 0) {
@@ -161,61 +125,43 @@ function buscar() {
         return;
     }
 
-    // Ordenar por prioridad
-    coincidencias.sort((a, b) => b.prioridad - a.prioridad);
+    coincidencias.sort((a, b) => b.p - a.p);
 
-    // Principal
     const principal = coincidencias[0].reg;
     const otros = coincidencias.slice(1).map(c => c.reg);
-    similares = otros;
 
     divPrincipal.innerHTML = construirTabla(principal);
 
-    // Mostrar SIMILARES
     if (otros.length > 0) {
-        let opciones = '<option value="">-- seleccionar --</option>';
+        similares = otros;
 
-        otros.forEach((r, idx) => {
-            opciones += `<option value="${idx}">
-                ${esc(r.placa)} — ${esc(r.tipo)} — ${esc(r.descripcion.substring(0, 30))}...
-            </option>`;
+        let ops = "<option value=''>-- seleccionar --</option>";
+
+        otros.forEach((r, i) => {
+            ops += `<option value="${i}">Placa ${r.placa} · Chapa ${r.chapa} · ${r.tipo}</option>`;
         });
 
-        divSimilares.innerHTML = `
+        divSim.innerHTML = `
             <div class="similares-box">
-                <label class="similares-label">SIMILARES:</label>
-                <select onchange="mostrarSimilar(this.value)">
-                    ${opciones}
+                <label>SIMILARES:</label>
+                <select id="similaresSelect" onchange="mostrarSimilar(this.value)">
+                    ${ops}
                 </select>
             </div>
         `;
     }
 }
 
-// ============================================================
-//  MOSTRAR SIMILAR
-// ============================================================
-function mostrarSimilar(indice) {
-    indice = parseInt(indice);
-    if (isNaN(indice) || !similares[indice]) return;
-
-    const divPrincipal = document.getElementById("resultado-principal");
-    divPrincipal.innerHTML = construirTabla(similares[indice]);
+function mostrarSimilar(i) {
+    if (isNaN(i)) return;
+    document.getElementById("resultado-principal").innerHTML =
+        construirTabla(similares[i]);
 }
 
-// ============================================================
-//  RELOJ EN FOOTER
-// ============================================================
-function actualizarFechaHora() {
-    const ahora = new Date();
-    const fecha = ahora.toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-    const hora = ahora.toLocaleTimeString("es-ES");
-    document.getElementById("fechaHora").textContent = fecha + " • " + hora;
-}
-setInterval(actualizarFechaHora, 1000);
-
-// ============================================================
-//  INICIO
-// ============================================================
-cargarJSON();
-actualizarFechaHora();
+// ==================== FECHA/HORA ====================
+setInterval(() => {
+    const f = new Date();
+    document.getElementById("fechaHora").textContent =
+        f.toLocaleDateString("es-ES", { weekday:"long", year:"numeric", month:"long", day:"numeric" }) +
+        " — " + f.toLocaleTimeString("es-ES");
+}, 1000);
