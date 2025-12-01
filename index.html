@@ -1,455 +1,637 @@
-<!DOCTYPE html>
+
+<!DOCTYPE html> 
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<title>Buscador PMT - Placas y Licencias</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Inserted by miarroba -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7294310421616689" crossorigin="anonymous"></script>
+    <script type='text/javascript' src='https://ads.vidoomy.com/miarroba_23335.js' async></script>
+    <script>
+    (function(w,d,s,l,i){w[l]=w[l]||[];
+      w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+      var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+      j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+      f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-T2VG59');
+    </script>
+    <!-- Inserted by miarroba -->
 
-<style>
-:root{
-  --cian:#00ffe6;
-  --verde:#00ff6a;
-  --rojo:#ff0044;
-  --bg:#050509;
-  --panel:#05070b;
-  --borde:#00ffe6;
-  --text:#f5f5f5;
-  --accent:#ffdd33;
-  --danger:#ff4d6a;
-  --radius:14px;
-  --shadow:0 0 35px rgba(0,255,230,0.4);
-  --shadow-soft:0 0 18px rgba(0,0,0,0.8);
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POLICIA MUNICIPAL DE TRANSITO----TRANSPORTES---BY GELM</title>
 
-*{box-sizing:border-box;margin:0;padding:0;}
+    <!-- Librería XLSX -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-body{
-  min-height:100vh;
-  background:radial-gradient(circle at top,#1b0033 0%,#000 45%,#020608 100%);
-  color:var(--text);
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-}
+    <!-- MODO DIOS: FONDO NEROX -->
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            color: #eee;
+            /* Fondo tipo TRON / NEROX GOD MODE */
+            background: radial-gradient(circle at 20% 0%, rgba(0,255,255,0.2), transparent 50%),
+                        radial-gradient(circle at 80% 0%, rgba(255,0,255,0.18), transparent 55%),
+                        #05010a;
+            background-attachment: fixed;
+            animation: fondoGlow 6s ease-in-out infinite alternate;
+        }
 
-.app{
-  width:100%;
-  max-width:1080px;
-  background:rgba(0,0,0,0.88);
-  border-radius:22px;
-  border:2px solid rgba(0,255,230,0.8);
-  box-shadow:var(--shadow),0 0 90px rgba(0,0,0,0.9);
-  padding:22px 18px 20px;
-}
+        @keyframes fondoGlow {
+            0%   { box-shadow: inset 0 0 20px #ff00ff; }
+            50%  { box-shadow: inset 0 0 80px #00ffff; }
+            100% { box-shadow: inset 0 0 120px #ff00ff; }
+        }
 
-.app-header{
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:16px;
-}
+        .contenedor {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.82);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow:
+                0 0 18px rgba(0,255,255,0.5),
+                0 0 50px rgba(0,0,0,1);
+            border: 1px solid rgba(0,255,255,0.35);
+        }
 
-.app-title{
-  font-size:20px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  color:var(--cian);
-  text-shadow:0 0 14px rgba(0,255,230,0.9);
-}
+        /* ====== ENCABEZADO + LOGOS ====== */
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
 
-.app-sub{
-  font-size:11px;
-  color:#a0f7ff;
-  text-transform:uppercase;
-}
+        .logo-box {
+            flex: 0 0 auto;
+            padding: 6px;
+            border-radius: 14px;
+            background: radial-gradient(circle at 30% 0, rgba(0,255,120,0.3), rgba(0,255,255,0.05));
+            box-shadow:
+                0 0 10px rgba(0,255,120,0.9),
+                0 0 25px rgba(0,0,0,0.9);
+            border: 1px solid rgba(0,255,180,0.9);
+        }
 
-.badge{
-  font-size:11px;
-  padding:3px 10px;
-  border-radius:999px;
-  border:1px solid rgba(0,255,230,0.6);
-  background:linear-gradient(90deg,rgba(0,0,0,0.7),rgba(0,0,0,0.2));
-  color:var(--accent);
-}
+        .logo-box img {
+            display: block;
+            max-width: 110px;
+            height: auto;
+        }
 
-.search-panel{
-  margin-top:10px;
-  display:grid;
-  grid-template-columns:minmax(0,1.6fr) minmax(0,1.1fr) auto;
-  gap:12px;
-  align-items:end;
-}
+        .titulos {
+            flex: 1 1 auto;
+            text-align: center;
+        }
 
-@media(max-width:780px){
-  .search-panel{
-    grid-template-columns:1fr;
-  }
-}
+        .titulos-linea1 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ffc8;
+            text-shadow: 0 0 10px #00ffff, 0 0 25px #0044ff;
+            letter-spacing: 1px;
+        }
 
-.field{
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-}
+        .titulos-linea2 {
+            font-size: 15px;
+            margin-top: 4px;
+            color: #ffdf5e;
+            text-shadow: 0 0 6px #000;
+        }
 
-label{
-  font-size:12px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  color:#b0fafa;
-}
+        .titulos-linea3 {
+            font-size: 14px;
+            margin-top: 3px;
+            color: #a5ffe5;
+            text-shadow: 0 0 6px #00ffea;
+        }
 
-input[type="text"]{
-  background:#020308;
-  border-radius:var(--radius);
-  border:1px solid rgba(0,255,230,0.45);
-  padding:10px 12px;
-  font-size:15px;
-  color:var(--text);
-  box-shadow:var(--shadow-soft);
-  outline:none;
-}
+        .titulos-linea4 {
+            font-size: 13px;
+            margin-top: 4px;
+            color: #cccccc;
+        }
 
-input[type="text"]::placeholder{
-  color:#788a90;
-}
+        #estado {
+            text-align: center;
+            margin: 12px 0 15px 0;
+            font-size: 14px;
+            color: #aaa;
+        }
 
-.mode-toggle{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  padding:9px 10px;
-  border-radius:var(--radius);
-  border:1px solid rgba(0,255,230,0.45);
-  background:linear-gradient(135deg,rgba(0,0,0,0.85),rgba(0,10,20,0.96));
-  box-shadow:var(--shadow-soft);
-}
+        .buscador {
+            max-width: 700px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
 
-.mode-toggle label{
-  display:flex;
-  align-items:center;
-  gap:4px;
-  font-size:12px;
-  color:#e1ffff;
-}
+        .buscador input {
+            padding: 10px 12px;
+            font-size: 16px;
+            border-radius: 999px;
+            border: 1px solid #00ffc8;
+            min-width: 230px;
+            outline: none;
+            background: #050513;
+            color: #00ffc8;
+            box-shadow: 0 0 10px rgba(0,255,255,0.5);
+        }
 
-.mode-toggle input{
-  accent-color:var(--cian);
-}
+        .buscador input::placeholder {
+            color: #66ffe6;
+        }
 
-.btn{
-  border:none;
-  border-radius:var(--radius);
-  padding:11px 18px;
-  background:radial-gradient(circle at top,var(--cian) 0%,#0088ff 40%,#00142a 100%);
-  color:#001015;
-  font-weight:700;
-  font-size:14px;
-  cursor:pointer;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  box-shadow:0 0 16px rgba(0,255,230,0.8);
-  transition:transform .12s ease-out,box-shadow .12s ease-out,filter .12s ease-out;
-}
+        .buscador button {
+            padding: 10px 22px;
+            font-size: 16px;
+            border-radius: 999px;
+            border: none;
+            background: radial-gradient(circle at 30% 0, #00ffff, #5f00ff);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 4px #00ffea;
+            box-shadow:
+                0 0 10px rgba(0,255,255,0.8),
+                0 0 26px rgba(0,0,0,0.9);
+        }
 
-.btn:hover{
-  transform:translateY(-1px) scale(1.02);
-  box-shadow:0 0 24px rgba(0,255,230,1);
-  filter:brightness(1.05);
-}
+        .buscador button:hover {
+            filter: brightness(1.1);
+        }
 
-.btn:active{
-  transform:translateY(1px) scale(0.98);
-  box-shadow:0 0 14px rgba(0,255,230,0.7);
-}
+        #resultado {
+            max-width: 100%;
+            overflow-x: auto;
+        }
 
-.summary{
-  margin-top:10px;
-  font-size:12px;
-  min-height:18px;
-  color:#d0f9ff;
-}
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+            background: #141414;
+        }
 
-.results-panel{
-  margin-top:16px;
-  display:none;
-}
+        th, td {
+            border: 1px solid #333;
+            padding: 6px 8px;
+            font-size: 13px;
+            text-align: left;
+        }
 
-.results-panel.active{
-  display:block;
-}
+        th {
+            background: #00ffc8;
+            color: #000;
+        }
 
-.results-header{
-  font-size:12px;
-  margin-bottom:6px;
-  color:#bffcff;
-}
+        tr:nth-child(even) td {
+            background: #101010;
+        }
 
-#resultadoSelect{
-  width:100%;
-  background:#050910;
-  color:var(--text);
-  border-radius:var(--radius);
-  border:1px solid rgba(0,255,230,0.55);
-  padding:9px 10px;
-  font-size:13px;
-  box-shadow:var(--shadow-soft);
-}
+        .nota {
+            text-align: center;
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 8px;
+        }
 
-.detalle{
-  margin-top:18px;
-  padding:14px 14px 10px;
-  border-radius:18px;
-  background:linear-gradient(145deg,rgba(0,0,0,0.94),rgba(0,12,24,0.98));
-  border:1px solid rgba(0,255,230,0.45);
-  box-shadow:0 0 26px rgba(0,0,0,0.95),0 0 28px rgba(0,255,230,0.35);
-}
+        /* ===== BOTÓN HOLOGRÁFICO CONTACTO ===== */
+        .contacto-wrapper {
+            margin-top: 18px;
+            text-align: center;
+        }
 
-.detalle-title{
-  font-size:15px;
-  margin-bottom:6px;
-  color:var(--verde);
-  text-shadow:0 0 10px rgba(0,255,106,0.8);
-}
+        .btn-contacto {
+            position: relative;
+            display: inline-block;
+            padding: 10px 26px;
+            border-radius: 999px;
+            border: 1px solid #00ffc8;
+            background: transparent;
+            color: #a8ffe8;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            overflow: hidden;
+            text-shadow: 0 0 4px #000;
+            box-shadow:
+                0 0 14px rgba(0,255,255,0.7),
+                0 0 30px rgba(0,0,0,1);
+        }
 
-.detalle-sub{
-  font-size:11px;
-  margin-bottom:10px;
-  color:#9be8ff;
-}
+        .btn-contacto span.icono {
+            margin-right: 6px;
+        }
 
-.table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
-}
+        .btn-contacto::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(120deg,
+                        rgba(0,255,255,0),
+                        rgba(0,255,180,0.8),
+                        rgba(0,255,255,0));
+            opacity: 0.35;
+            transform: translateX(-100%);
+            animation: scan 3s linear infinite;
+            pointer-events: none;
+        }
 
-.table tr:nth-child(odd){
-  background:rgba(255,255,255,0.02);
-}
+        .btn-contacto::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: 0 0 20px rgba(0,255,120,0.4);
+            opacity: 0;
+            transition: opacity 0.25s ease-out;
+        }
 
-.table th, .table td{
-  padding:4px 6px;
-  text-align:left;
-}
+        .btn-contacto:hover::after {
+            opacity: 1;
+        }
 
-.table th{
-  color:#8de8ff;
-  font-weight:600;
-  text-transform:uppercase;
-  font-size:11px;
-}
+        @keyframes scan {
+            0%   { transform: translateX(-120%); }
+            100% { transform: translateX(120%); }
+        }
 
-.table td{
-  color:#f0faff;
-}
+        /* ===== SIMILARES ===== */
+        .similares-box {
+            margin-top: 10px;
+            text-align: left;
+            font-size: 12px;
+            color: #a8ffe8;
+        }
 
-.msg{
-  margin-top:12px;
-  font-size:12px;
-}
+        .similares-box label {
+            margin-right: 6px;
+            font-weight: bold;
+        }
 
-.msg.error{
-  color:var(--danger);
-}
+        .similares-box select {
+            background: #020b40;
+            color: #ffffff;
+            border-radius: 999px;
+            border: 1px solid #00ffc8;
+            padding: 5px 10px;
+            min-width: 250px;
+        }
 
-.msg.info{
-  color:#b8f4ff;
-}
+        /* ===== FOOTER FECHA/HORA ===== */
+        .footer-info {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 12px;
+            color: #4ee8ff;
+            text-shadow: 0 0 8px #00fff2;
+        }
 
-.highlight{
-  font-weight:600;
-  color:var(--accent);
-}
+        .footer-info strong {
+            color: #7bffb2;
+        }
 
-.footer{
-  margin-top:10px;
-  font-size:10px;
-  text-align:right;
-  color:#6fffee;
-}
-</style>
+        @media(max-width: 768px){
+            .contenedor {
+                padding: 14px;
+            }
+            .header-top {
+                flex-direction: column;
+            }
+            .logo-box img {
+                max-width: 95px;
+            }
+            .titulos-linea1 {
+                font-size: 18px;
+            }
+            .titulos-linea2 {
+                font-size: 14px;
+            }
+            .titulos-linea3,
+            .titulos-linea4 {
+                font-size: 12px;
+            }
+        }
+
+        @media(max-width: 480px){
+            .buscador {
+                flex-direction: column;
+            }
+            .buscador button {
+                width: 100%;
+                max-width: 260px;
+            }
+            .btn-contacto {
+                width: 100%;
+                max-width: 280px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-<div class="app">
+<!-- Inserted by miarroba -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T2VG59" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- Inserted by miarroba -->
 
-  <div class="app-header">
-    <div>
-      <div class="app-title">Buscador PMT</div>
-      <div class="app-sub">Placas · Número de licencia · Historial</div>
+<div class="contenedor">
+
+    <!-- ENCABEZADO CON LOGOS -->
+    <div class="header-top">
+        <div class="logo-box">
+            <img src="https://gelmhistoria.webcindario.com/pmt.jpg" alt="Logo PMT">
+        </div>
+
+        <div class="titulos">
+            <div class="titulos-linea1">POLICÍA MUNICIPAL DE TRÁNSITO - CHIMALTENANGO</div>
+            <div class="titulos-linea2">DELEGACIÓN DE TRANSPORTES</div>
+            <div class="titulos-linea3">Sistema de Consulta 2014 - 2025 ? == BY GELM == ?</div>
+            <div class="titulos-linea4">Buscador de vehiculos o lineas Autorizadas con registro en esta jefatura 2025</div>
+        </div>
+
+        <div class="logo-box">
+            <img src="https://gelmhistoria.webcindario.com/PMT/gelm.png" alt="Logo GELM">
+        </div>
     </div>
-    <div class="badge">Módulo independiente :: by gelm</div>
-  </div>
 
-  <div class="search-panel">
-    <div class="field">
-      <label for="query">Texto de búsqueda</label>
-      <input id="query" type="text" placeholder="Ej: M-098HJX · 1918-61907-0805 · 1918619070805">
+    <div id="estado">Cargando archivo Excel...</div>
+
+    <div class="buscador">
+        <input id="busquedaInput" type="text"
+               placeholder="Placa, DPI, No. licencia, documento o No. de calcomanía...">
+        <button onclick="buscar()">Buscar</button>
     </div>
 
-    <div class="field">
-      <label>Modo</label>
-      <div class="mode-toggle">
-        <label><input type="radio" name="mode" value="placa" checked> Por placa</label>
-        <label><input type="radio" name="mode" value="licencia"> Por número de licencia</label>
-      </div>
+    <p class="nota">
+        Puedes escribir con o sin espacios / guiones. Ej:<br>
+        <b>1856 12258 0413</b> ó <b>1856122580413</b> &nbsp; | &nbsp;
+        <b>1056-12250413</b> ó <b>105612250413</b> &nbsp; | &nbsp;
+        <b>40</b> (No. calcomanía)
+    </p>
+
+    <div id="resultado">
+        <div id="resultado-principal"></div>
+        <div id="similares-contenedor"></div>
     </div>
 
-    <div class="field">
-      <button id="btnBuscar" class="btn">Buscar</button>
+    <!-- BOTÓN HOLOGRÁFICO CONTACTO -->
+    <div class="contacto-wrapper">
+        <button class="btn-contacto" onclick="window.location.href='mailto:nerox2mil@proton.me'">
+            <span class="icono">??</span>
+            <span>Más información / Contactar a GELM</span>
+        </button>
     </div>
-  </div>
 
-  <div id="summary" class="summary"></div>
-
-  <div id="resultsPanel" class="results-panel">
-    <div class="results-header">Coincidencias encontradas:</div>
-    <select id="resultadoSelect" size="4"></select>
-  </div>
-
-  <div id="detalle" class="detalle" style="display:none;"></div>
-
-  <div id="msg" class="msg info"></div>
-
-  <div class="footer">PMT Chimaltenango • Módulo interno de consulta</div>
+    <!-- FOOTER FECHA/HORA -->
+    <div class="footer-info">
+        <div>2014 - 2025 | <strong>BY GELM</strong> | Delegación de Transportes PMT - Chimaltenango<br>
+        att: ---[GELM]---</div>
+        <div id="fechaHora"></div>
+    </div>
 
 </div>
 
 <script>
-const DATA_URL = "placas.json";
-
 let registros = [];
-let ultimosResultados = [];
+let similares = []; // para el desplegable
 
-function normalizarPlaca(txt){
-  return txt ? txt.toUpperCase().replace(/[^A-Z0-9]/g,"") : "";
+// ========== CARGAR EXCEL ==========
+async function cargarExcel() {
+    try {
+        const resp = await fetch("2025.xlsx");   // Debe estar en la misma carpeta que este HTML
+        if (!resp.ok) throw new Error("No se pudo descargar 2025.xlsx");
+
+        const data = await resp.arrayBuffer();
+        const wb = XLSX.read(data, { type: "array" });
+
+        const hoja = wb.Sheets[wb.SheetNames[0]];
+        const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, raw: false });
+
+        // Buscar la primera fila con una placa (M-...)
+        let inicio = filas.findIndex(f =>
+            (f[0] || "").toString().trim().toUpperCase().startsWith("M-")
+        );
+        if (inicio === -1) {
+            document.getElementById("estado").textContent =
+                "No se encontraron registros de placas en el Excel.";
+            return;
+        }
+
+        for (let i = inicio; i < filas.length; i++) {
+            const f = filas[i];
+            if (!f[0]) continue; // fila vacía
+
+            registros.push({
+                placa:        (f[0]  || "").trim().toUpperCase(),  // A
+                calcomania:   (f[1]  || "").trim(),                // B
+                placaSale:    (f[2]  || "").trim(),                // C
+                concesionario:(f[3]  || "").trim(),                // D
+                telDueno:     (f[4]  || "").trim(),                // E
+                ruta:         (f[5]  || "").trim(),                // F
+                telPilotos:   (f[6]  || "").trim(),                // G
+                nombrePiloto: (f[7]  || "").trim(),                // H
+                dpi:          (f[8]  || "").trim(),                // I
+                documento:    (f[9]  || "").trim(),                // J
+                licencia:     (f[10] || "").trim().toUpperCase(), // K
+                tipoLic:      (f[11] || "").trim()                 // L
+            });
+        }
+
+        document.getElementById("estado").textContent =
+            "Archivo cargado. Registros: " + registros.length;
+    } catch (err) {
+        console.error(err);
+        document.getElementById("estado").textContent = "Error: " + err.message;
+    }
 }
 
-function normalizarLicencia(txt){
-  return txt ? txt.replace(/[^A-Za-z0-9]/g,"") : "";
+// ========== NORMALIZAR (quita espacios y guiones) ==========
+function normalizar(txt) {
+    return txt.toString()
+              .replace(/\s+/g, "")
+              .replace(/-/g, "")
+              .trim()
+              .toUpperCase();
 }
 
-async function cargarDatos(){
-  try{
-    const resp = await fetch(DATA_URL,{cache:"no-store"});
-    registros = await resp.json();
-    document.getElementById("msg").textContent =
-      "Base cargada: " + registros.length + " registros disponibles.";
-  }catch(e){
-    document.getElementById("msg").textContent =
-    "Error cargando la base de datos (placas.json).";
-    document.getElementById("msg").className = "msg error";
-  }
+// Pequeño escape para HTML
+function esc(str) {
+    return str
+        .toString()
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;");
 }
 
-function buscar(){
-  const qRaw = document.getElementById("query").value.trim();
-  const mode = document.querySelector("input[name='mode']:checked").value;
-  const summary = document.getElementById("summary");
-  const msg = document.getElementById("msg");
-  const panel = document.getElementById("resultsPanel");
-  const select = document.getElementById("resultadoSelect");
-  const detalle = document.getElementById("detalle");
+// Construye la tabla HTML de un registro
+function construirTabla(r) {
+    if (!r) return "";
+    return `
+        <table>
+            <tr>
+                <th>NO. PLACA</th>
+                <th>NO. CALCOMANIA</th>
+                <th>PLACA SALE</th>
+                <th>CONCESIONARIO (A)</th>
+                <th>TEL. DUEÑO</th>
+                <th>RUTA</th>
+                <th>TEL. PILOTOS</th>
+                <th>NOMBRE DEL PILOTO</th>
+                <th>DPI</th>
+                <th>DOCUMENTO</th>
+                <th>NUMERO DE LICENCIA</th>
+                <th>TIPO LICENCIA</th>
+            </tr>
+            <tr>
+                <td>${esc(r.placa)}</td>
+                <td>${esc(r.calcomania)}</td>
+                <td>${esc(r.placaSale)}</td>
+                <td>${esc(r.concesionario)}</td>
+                <td>${esc(r.telDueno)}</td>
+                <td>${esc(r.ruta)}</td>
+                <td>${esc(r.telPilotos)}</td>
+                <td>${esc(r.nombrePiloto)}</td>
+                <td>${esc(r.dpi)}</td>
+                <td>${esc(r.documento)}</td>
+                <td>${esc(r.licencia)}</td>
+                <td>${esc(r.tipoLic)}</td>
+            </tr>
+        </table>
+    `;
+}
 
-  detalle.style.display = "none";
-  detalle.innerHTML = "";
-  panel.classList.remove("active");
-  select.innerHTML = "";
-  msg.textContent = "";
-  msg.className = "msg info";
+// ========== BUSCAR ==========
+function buscar() {
+    const texto = document.getElementById("busquedaInput").value.trim();
+    const valorMayus = texto.toUpperCase();
+    const limpio = normalizar(texto);
 
-  if(!qRaw){
-    summary.textContent = "";
-    msg.textContent = "Escribe una placa o número de licencia para iniciar la búsqueda.";
-    return;
-  }
+    const divPrincipal = document.getElementById("resultado-principal");
+    const divSimilares = document.getElementById("similares-contenedor");
 
-  let qNorm = mode === "placa" ? normalizarPlaca(qRaw) : normalizarLicencia(qRaw);
+    divSimilares.innerHTML = "";
+    similares = [];
 
-  if(!qNorm){
-    summary.textContent = "";
-    msg.textContent = "El texto ingresado no contiene caracteres válidos.";
-    return;
-  }
+    if (!texto) {
+        divPrincipal.innerHTML = "<p>Escribe placa, DPI, número de licencia, documento o No. de calcomanía.</p>";
+        return;
+    }
 
-  let resultados = mode === "placa"
-    ? registros.filter(r => r.placa_norm && r.placa_norm.includes(qNorm))
-    : registros.filter(r => r.licencia_norm && r.licencia_norm.includes(qNorm));
+    // Reunimos TODAS las coincidencias con prioridad
+    const coincidencias = [];
 
-  ultimosResultados = resultados;
+    registros.forEach(reg => {
+        let prioridad = 0;
 
-  if(!resultados.length){
-    summary.innerHTML = 'Sin resultados para <span class="highlight">'+qRaw+'</span>.';
-    msg.textContent = "Verifica si la placa o licencia está bien escrita.";
-    msg.className = "msg error";
-    return;
-  }
+        // Número de calcomanía exacto
+        if (reg.calcomania === texto || reg.calcomania === limpio) {
+            // Damos prioridad más alta a CASCO/URBANO (mototaxis base)
+            const rutaMayus = reg.ruta.toUpperCase();
+            if (rutaMayus.includes("CASCO")) {
+                prioridad = 100;
+            } else {
+                prioridad = 90;
+            }
+        }
 
-  summary.innerHTML =
-    'Se encontraron <span class="highlight">'+resultados.length+
-    "</span> coincidencia(s) para <span class='highlight'>"+qRaw+"</span>";
+        // Placa
+        if (reg.placa === valorMayus) {
+            prioridad = Math.max(prioridad, 80);
+        }
 
-  if(resultados.length === 1){
-    mostrarDetalle(resultados[0]);
-  }else{
-    panel.classList.add("active");
-    resultados.forEach((r,idx)=>{
-      const opt = document.createElement("option");
-      opt.value = idx;
-      opt.textContent =
-        (r.placa || "SIN PLACA")+" | Lic: "+(r.licencia || "SIN LICENCIA")+
-        " | Boleta: "+(r.boleta || "")+" | "+(r.fecha || "");
-      select.appendChild(opt);
+        // DPI
+        if (normalizar(reg.dpi) === limpio) {
+            prioridad = Math.max(prioridad, 70);
+        }
+
+        // Licencia
+        if (normalizar(reg.licencia) === limpio) {
+            prioridad = Math.max(prioridad, 60);
+        }
+
+        // Documento
+        if (normalizar(reg.documento) === limpio) {
+            prioridad = Math.max(prioridad, 50);
+        }
+
+        if (prioridad > 0) {
+            coincidencias.push({ reg, prioridad });
+        }
     });
-    select.selectedIndex = 0;
-    mostrarDetalle(resultados[0]);
-  }
+
+    if (coincidencias.length === 0) {
+        divPrincipal.innerHTML = `<p>No se encontró <strong>${esc(texto)}</strong>.</p>`;
+        return;
+    }
+
+    // Ordenamos por prioridad (descendente)
+    coincidencias.sort((a, b) => b.prioridad - a.prioridad);
+
+    const principal = coincidencias[0].reg;
+    const otros = coincidencias.slice(1).map(c => c.reg);
+    similares = otros; // almacenamos para el select
+
+    // Mostramos el principal
+    divPrincipal.innerHTML = construirTabla(principal);
+
+    // Si hay más resultados, mostramos desplegable "SIMILARES"
+    if (otros.length > 0) {
+        let opciones = '<option value="">-- seleccionar --</option>';
+        otros.forEach((r, idx) => {
+            const desc = `Calcomanía ${r.calcomania} ? ${r.ruta} ? ${r.placa}`;
+            opciones += `<option value="${idx}">${esc(desc)}</option>`;
+        });
+
+        divSimilares.innerHTML = `
+            <div class="similares-box">
+                <label for="similaresSelect">SIMILARES:</label>
+                <select id="similaresSelect" onchange="mostrarSimilar(this.value)">
+                    ${opciones}
+                </select>
+            </div>
+        `;
+    }
 }
 
-function mostrarDetalle(reg){
-  const detalle = document.getElementById("detalle");
-  detalle.style.display = "block";
-
-  detalle.innerHTML = `
-    <div class="detalle-title">Placa ${reg.placa || "SIN PLACA"}</div>
-    <div class="detalle-sub">No. licencia: <span class="highlight">${reg.licencia || "SIN LICENCIA"}</span>
-    · Boleta: ${reg.boleta || ""} · Fecha: ${reg.fecha || ""} · Hora: ${reg.hora || ""}</div>
-
-    <table class="table">
-      <tbody>
-        <tr><th>Serie</th><td>${reg.serie || ""}</td></tr>
-        <tr><th>Tipo</th><td>${reg.tipo || ""}</td></tr>
-        <tr><th>Marca</th><td>${reg.marca || ""}</td></tr>
-        <tr><th>Color</th><td>${reg.color || ""}</td></tr>
-        <tr><th>Dirección</th><td>${reg.direccion || ""}</td></tr>
-        <tr><th>Departamento</th><td>${reg.departamento || ""}</td></tr>
-        <tr><th>Municipio</th><td>${reg.municipio || ""}</td></tr>
-        <tr><th>Conductor</th><td>${reg.conductor || ""}</td></tr>
-        <tr><th>Artículo</th><td>${reg.articulo || ""}</td></tr>
-        <tr><th>Descripción</th><td>${reg.descripcion || ""}</td></tr>
-        <tr><th>Chapa</th><td>${reg.chapa || ""}</td></tr>
-      </tbody>
-    </table>
-  `;
+// Cambiar a otro registro similar desde el select
+function mostrarSimilar(indice) {
+    const i = parseInt(indice, 10);
+    if (isNaN(i) || !similares[i]) return;
+    const divPrincipal = document.getElementById("resultado-principal");
+    divPrincipal.innerHTML = construirTabla(similares[i]);
 }
 
-document.getElementById("btnBuscar").addEventListener("click", buscar);
-document.getElementById("query").addEventListener("keydown", e=>{
-  if(e.key === "Enter") buscar();
-});
+// ========== RELOJ EN FOOTER ==========
+function actualizarFechaHora() {
+    const ahora = new Date();
+    const opciones = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    };
+    const fecha = ahora.toLocaleDateString("es-ES", opciones);
+    const hora = ahora.toLocaleTimeString("es-ES");
+    const el = document.getElementById("fechaHora");
+    if (el) {
+        el.textContent = fecha + " ? " + hora;
+    }
+}
+setInterval(actualizarFechaHora, 1000);
+actualizarFechaHora();
 
-document.getElementById("resultadoSelect").addEventListener("change", e=>{
-  const idx = parseInt(e.target.value,10);
-  if(ultimosResultados[idx]) mostrarDetalle(ultimosResultados[idx]);
-});
-
-cargarDatos();
+// Iniciar carga de Excel al entrar
+cargarExcel();
 </script>
 
+<!-- Inserted by miarroba -->
+</script></noframes></noembed></noscript>
+<script type="text/javascript" src="/hosting__contador__visitas__unicas.php?h=2204386&amp;t=1763949688&amp;k=4ab2767312a69326a334b11deace8108&amp;__muid="></script>
+<!-- Inserted by miarroba -->
 </body>
 </html>
