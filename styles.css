@@ -79,3 +79,28 @@ body {
     border: 1px solid cyan;
     border-radius: 10px;
 }
+.lineaMulta {
+    margin-top: 6px;
+    padding: 6px;
+    font-size: 14px;
+    color: #b8ffff;
+    border-bottom: 1px solid rgba(0,255,255,0.2);
+}
+
+.lineaMulta:last-child {
+    border-bottom: none;
+}
+
+.itemResultado {
+    background: rgba(0,50,60,0.5);
+    border: 1px solid cyan;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.resMini {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #00eaff;
+}
