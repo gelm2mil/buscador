@@ -1,4 +1,4 @@
-const CACHE = "pmt-2025-v3";
+const CACHE = "pmt-2025-v4";
 
 const FILES = [
     "./",
@@ -10,20 +10,18 @@ const FILES = [
     "manifest.json"
 ];
 
-// INSTALAR
+// INSTALAR CACHE
 self.addEventListener("install", e => {
     e.waitUntil(
-        caches.open(CACHE).then(cache => cache.addAll(FILES))
+        caches.open(CACHE).then(c => c.addAll(FILES))
     );
 });
 
-// ACTIVAR (LIMPIA CACHES VIEJOS)
+// ACTIVAR (limpia versiones viejas)
 self.addEventListener("activate", e => {
     e.waitUntil(
         caches.keys().then(keys =>
-            Promise.all(
-                keys.map(k => (k !== CACHE ? caches.delete(k) : null))
-            )
+            Promise.all(keys.map(k => (k !== CACHE ? caches.delete(k) : null)))
         )
     );
 });
@@ -31,12 +29,15 @@ self.addEventListener("activate", e => {
 // FETCH
 self.addEventListener("fetch", e => {
 
-    // 🟢 Permitimos que siempre cargue la versión nueva del JSON
-    if (e.request.url.includes("placas.json")) {
-        return fetch(e.request);
+    const url = e.request.url;
+
+    // 🟢 Permitir SIEMPRE descargar placas.json SIN bloquearlo
+    if (url.includes("placas.json")) {
+        e.respondWith(fetch(e.request));
+        return;
     }
 
-    // 🟢 Cache-first para todo lo demás
+    // 🟢 Todo lo demás: cache FIRST
     e.respondWith(
         caches.match(e.request).then(resp => resp || fetch(e.request))
     );
