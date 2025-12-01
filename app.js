@@ -1,21 +1,25 @@
-// ==================== CONFIG ====================
-const DATA_URL = "https://raw.githubusercontent.com/gelm2mil/buscador/main/placas.json";
+// =====================================================
+//                ⚡ CONFIGURACIÓN ⚡
+// =====================================================
+const DATA_URL = "placas.json";   // LOCAL - SIEMPRE FUNCIONA
 
 let registros = [];
 let similares = [];
-let ultimoFiltro = "";  // PRO MAX: para saber qué se exportará
+let ultimoFiltro = "";  // Para exportar EXCEL
 
-document.addEventListener("DOMContentLoaded", () => {
-    cargarJSON();
-});
 
-// ==================== CARGAR JSON ====================
+document.addEventListener("DOMContentLoaded", cargarJSON);
+
+// =====================================================
+//                ⚡ CARGAR JSON ⚡
+// =====================================================
 async function cargarJSON() {
     try {
         document.getElementById("estado").textContent = "Cargando archivo JSON...";
 
         const resp = await fetch(DATA_URL, { cache: "no-store" });
-        if (!resp.ok) throw new Error("No se pudo descargar placas.json");
+
+        if (!resp.ok) throw new Error("No se pudo cargar placas.json");
 
         registros = await resp.json();
 
@@ -23,29 +27,47 @@ async function cargarJSON() {
             "Archivo cargado correctamente. Registros: " + registros.length;
 
     } catch (err) {
-        console.error(err);
+        console.error("ERROR JSON:", err);
         document.getElementById("estado").textContent = "Error: " + err.message;
     }
 }
 
-// ==================== FUNCIONES ====================
+
+
+// =====================================================
+//           ⚡ NORMALIZADOR ANTI-ERRORES ⚡
+// =====================================================
 function normalizar(txt) {
-    return txt.toString()
-        .replace(/\s+/g, "")
-        .replace(/-/g, "")
+
+    // Si viene undefined, null, número, vacío → SIEMPRE devolver string limpia
+    if (!txt) return "";
+
+    return String(txt)
+        .replace(/\s+/g, "")   // quitar espacios
+        .replace(/-/g, "")     // quitar guiones
         .toUpperCase()
         .trim();
 }
 
+
+
+// =====================================================
+//                  ⚡ ESCAPAR HTML ⚡
+// =====================================================
 function esc(str) {
-    return str.toString()
+    if (!str) return "";
+    return String(str)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
 }
 
-// ==================== TABLA ====================
+
+
+// =====================================================
+//            ⚡ TABLA ULTRA COMPLETA ⚡
+// =====================================================
 function construirTabla(r) {
     return `
         <table>
@@ -91,12 +113,23 @@ function construirTabla(r) {
     `;
 }
 
-// ==================== BUSCADOR ====================
-function buscar() {
-    const texto = document.getElementById("busquedaInput").value.trim();
-    const limpio = normalizar(texto);
 
-    ultimoFiltro = texto;   // PRO MAX: guardamos lo que se buscó
+
+// =====================================================
+//                  ⚡ BUSCADOR PRO MAX ⚡
+// =====================================================
+function buscar() {
+
+    const texto = document.getElementById("busquedaInput").value.trim();
+
+    if (!texto) {
+        document.getElementById("resultado-principal").innerHTML =
+            "<p>Ingrese algo para buscar.</p>";
+        return;
+    }
+
+    const limpio = normalizar(texto);
+    ultimoFiltro = texto;
 
     const divPrincipal = document.getElementById("resultado-principal");
     const divSim = document.getElementById("similares-contenedor");
@@ -104,14 +137,10 @@ function buscar() {
     divSim.innerHTML = "";
     similares = [];
 
-    if (!texto) {
-        divPrincipal.innerHTML = "<p>Ingrese una búsqueda válida.</p>";
-        return;
-    }
-
     const coincidencias = [];
 
     registros.forEach(reg => {
+
         let p = 0;
 
         if (normalizar(reg.chapa) === limpio) p = 110;
@@ -119,13 +148,18 @@ function buscar() {
         if (normalizar(reg.licencia) === limpio) p = 90;
         if (normalizar(reg.boleta) === limpio) p = 80;
         if (normalizar(reg.dpi) === limpio) p = 70;
+
+        // búsqueda por descripción parcial
         if (normalizar(reg.descripcion).includes(limpio)) p = 60;
 
-        if (p > 0) coincidencias.push({ reg, p });
+        if (p > 0)
+            coincidencias.push({ reg, p });
+
     });
 
     if (coincidencias.length === 0) {
-        divPrincipal.innerHTML = `<p>No se encontró <strong>${esc(texto)}</strong>.</p>`;
+        divPrincipal.innerHTML =
+            `<p>No se encontró <strong>${esc(texto)}</strong>.</p>`;
         return;
     }
 
@@ -137,12 +171,13 @@ function buscar() {
     divPrincipal.innerHTML = construirTabla(principal);
 
     if (otros.length > 0) {
+
         similares = otros;
 
         let ops = "<option value=''>-- seleccionar --</option>";
 
         otros.forEach((r, i) => {
-            ops += `<option value="${i}">Placa ${r.placa} · Chapa ${r.chapa} · ${r.tipo}</option>`;
+            ops += `<option value="${i}">Placa ${r.placa} · Chapa ${r.chapa}</option>`;
         });
 
         divSim.innerHTML = `
@@ -156,19 +191,26 @@ function buscar() {
     }
 }
 
+
+
+// =====================================================
+//        ⚡ MOSTRAR SIMILAR (PRO MAX SEGURO) ⚡
+// =====================================================
 function mostrarSimilar(i) {
-    if (isNaN(i)) return;
+    if (i === "" || isNaN(i)) return;
     document.getElementById("resultado-principal").innerHTML =
         construirTabla(similares[i]);
 }
 
-// =============================================
-//         ⭐ EXPORTAR EXCEL PRO MAX ⭐
-// =============================================
+
+
+// =====================================================
+//           ⚡ EXPORTAR EXCEL PRO MAX ⚡
+// =====================================================
 function exportarExcelPRO() {
 
     if (!ultimoFiltro) {
-        alert("Papi, primero hacé una búsqueda.");
+        alert("Primero realiza una búsqueda, papi 🙏");
         return;
     }
 
@@ -189,7 +231,6 @@ function exportarExcelPRO() {
     }
 
     const hoja = XLSX.utils.json_to_sheet(datos);
-
     const libro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(libro, hoja, "MULTAS");
 
@@ -197,5 +238,5 @@ function exportarExcelPRO() {
 
     XLSX.writeFile(libro, nombre);
 
-    alert("Archivo Excel PRO MAX descargado ✨");
+    alert("Archivo Excel descargado ✨");
 }
