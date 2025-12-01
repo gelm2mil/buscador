@@ -1,18 +1,30 @@
-// ==================== CONFIG ====================
-const DATA_URL = "https://raw.githubusercontent.com/gelm2mil/buscador/main/placas.json";
+// =========================================================
+//                  CONFIGURACIÓN PRO MAX
+// =========================================================
+
+// URL CORRECTA del JSON (con anti-cache real)
+const DATA_URL =
+    "https://raw.githubusercontent.com/gelm2mil/buscador/refs/heads/main/placas.json?nocache=" +
+    Date.now();
 
 let registros = [];
 let similares = [];
-let ultimoFiltro = "";  // <- PRO MAX: para saber qué se exportará
+let ultimoFiltro = ""; // <- Para exportación PRO MAX
 
 document.addEventListener("DOMContentLoaded", cargarJSON);
 
-// ==================== CARGAR JSON ====================
+// =========================================================
+//                      CARGAR JSON
+// =========================================================
 async function cargarJSON() {
     try {
         document.getElementById("estado").textContent = "Cargando archivo JSON...";
 
-        const resp = await fetch(DATA_URL, { cache: "no-store" });
+        const resp = await fetch(DATA_URL, {
+            cache: "no-store",
+            headers: { "Cache-Control": "no-cache" }
+        });
+
         if (!resp.ok) throw new Error("No se pudo descargar placas.json");
 
         registros = await resp.json();
@@ -21,12 +33,16 @@ async function cargarJSON() {
             "Archivo cargado correctamente. Registros: " + registros.length;
 
     } catch (err) {
-        console.error(err);
+        console.error("ERROR AL CARGAR JSON:", err);
         document.getElementById("estado").textContent = "Error: " + err.message;
     }
 }
 
-// ==================== FUNCIONES ====================
+// =========================================================
+//                      FUNCIONES BASE
+// =========================================================
+
+// Normalizar datos
 function normalizar(txt) {
     return txt.toString()
         .replace(/\s+/g, "")
@@ -35,6 +51,7 @@ function normalizar(txt) {
         .trim();
 }
 
+// Escapar HTML
 function esc(str) {
     return str.toString()
         .replace(/&/g, "&amp;")
@@ -43,28 +60,18 @@ function esc(str) {
         .replace(/"/g, "&quot;");
 }
 
-// ==================== TABLA ====================
+// =========================================================
+//                      TABLA PRINCIPAL
+// =========================================================
 function construirTabla(r) {
     return `
         <table>
             <tr>
-                <th>SERIE</th>
-                <th>BOLETA</th>
-                <th>FECHA</th>
-                <th>HORA</th>
-                <th>PLACA</th>
-                <th>TIPO</th>
-                <th>MARCA</th>
-                <th>COLOR</th>
-                <th>DIRECCIÓN</th>
-                <th>DEPARTAMENTO</th>
-                <th>MUNICIPIO</th>
-                <th>CONDUCTOR</th>
-                <th>LIC</th>
-                <th>No. LICENCIA</th>
-                <th>ARTÍCULO</th>
-                <th>DESCRIPCIÓN</th>
-                <th>CHAPA</th>
+                <th>SERIE</th><th>BOLETA</th><th>FECHA</th><th>HORA</th>
+                <th>PLACA</th><th>TIPO</th><th>MARCA</th><th>COLOR</th>
+                <th>DIRECCIÓN</th><th>DEPARTAMENTO</th><th>MUNICIPIO</th>
+                <th>CONDUCTOR</th><th>LIC</th><th>No. LICENCIA</th>
+                <th>ARTÍCULO</th><th>DESCRIPCIÓN</th><th>CHAPA</th>
             </tr>
             <tr>
                 <td>${esc(r.serie)}</td>
@@ -89,13 +96,14 @@ function construirTabla(r) {
     `;
 }
 
-// ==================== BUSCADOR ====================
+// =========================================================
+//                      BUSCADOR PRO MAX
+// =========================================================
 function buscar() {
     const texto = document.getElementById("busquedaInput").value.trim();
     const limpio = normalizar(texto);
-    const valor = texto.toUpperCase();
 
-    ultimoFiltro = texto;   // <- PRO MAX: guardamos lo que se buscó
+    ultimoFiltro = texto; // guardar para exportar
 
     const divPrincipal = document.getElementById("resultado-principal");
     const divSim = document.getElementById("similares-contenedor");
@@ -118,7 +126,6 @@ function buscar() {
         if (normalizar(reg.licencia) === limpio) p = 90;
         if (normalizar(reg.boleta) === limpio) p = 80;
         if (normalizar(reg.dpi) === limpio) p = 70;
-
         if (normalizar(reg.descripcion).includes(limpio)) p = 60;
 
         if (p > 0) coincidencias.push({ reg, p });
@@ -131,14 +138,15 @@ function buscar() {
 
     coincidencias.sort((a, b) => b.p - a.p);
 
+    // Resultado principal
     const principal = coincidencias[0].reg;
     const otros = coincidencias.slice(1).map(c => c.reg);
 
     divPrincipal.innerHTML = construirTabla(principal);
 
+    // SIMILARES
     if (otros.length > 0) {
         similares = otros;
-
         let ops = "<option value=''>-- seleccionar --</option>";
 
         otros.forEach((r, i) => {
@@ -162,9 +170,9 @@ function mostrarSimilar(i) {
         construirTabla(similares[i]);
 }
 
-// =============================================
-//         ⭐ EXPORTAR EXCEL PRO MAX ⭐
-// =============================================
+// =========================================================
+//                 ⭐ EXPORTAR EXCEL PRO MAX ⭐
+// =========================================================
 function exportarExcelPRO() {
 
     if (!ultimoFiltro) {
@@ -174,7 +182,6 @@ function exportarExcelPRO() {
 
     const limpio = normalizar(ultimoFiltro);
 
-    // Filtrar coincidencias reales EXCEL
     const datos = registros.filter(reg =>
         normalizar(reg.chapa) === limpio ||
         normalizar(reg.placa) === limpio ||
@@ -189,17 +196,13 @@ function exportarExcelPRO() {
         return;
     }
 
-    // Convertir a hoja
     const hoja = XLSX.utils.json_to_sheet(datos);
-
-    // Crear libro Excel
     const libro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(libro, hoja, "MULTAS");
 
-    // Nombre dinámico del archivo
-    const nombre = `MULTAS_${ultimoFiltro.toUpperCase()}_${new Date().toLocaleDateString("es-GT")}.xlsx`;
+    const nombre =
+        `MULTAS_${ultimoFiltro.toUpperCase()}_${new Date().toLocaleDateString("es-GT")}.xlsx`;
 
-    // Descargar
     XLSX.writeFile(libro, nombre);
 
     alert("Archivo Excel PRO MAX descargado ✨");
