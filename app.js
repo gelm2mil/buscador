@@ -1,23 +1,26 @@
-// URL OFICIAL DEL JSON EN RAW
+// ==================== CONFIG ====================
 const DATA_URL = "https://raw.githubusercontent.com/gelm2mil/buscador/main/placas.json";
 
 let registros = [];
 let similares = [];
-let ultimoFiltro = "";
+let ultimoFiltro = "";  // PRO MAX: para saber qué se exportará
 
-document.addEventListener("DOMContentLoaded", cargarJSON);
+document.addEventListener("DOMContentLoaded", () => {
+    cargarJSON();
+});
 
+// ==================== CARGAR JSON ====================
 async function cargarJSON() {
     try {
         document.getElementById("estado").textContent = "Cargando archivo JSON...";
 
-        const resp = await fetch(DATA_URL + "?v=" + Date.now(), { cache: "no-store" });
+        const resp = await fetch(DATA_URL, { cache: "no-store" });
         if (!resp.ok) throw new Error("No se pudo descargar placas.json");
 
         registros = await resp.json();
 
         document.getElementById("estado").textContent =
-            `Archivo cargado correctamente. Registros: ${registros.length}`;
+            "Archivo cargado correctamente. Registros: " + registros.length;
 
     } catch (err) {
         console.error(err);
@@ -25,23 +28,45 @@ async function cargarJSON() {
     }
 }
 
+// ==================== FUNCIONES ====================
 function normalizar(txt) {
-    return txt.toString().replace(/\s+/g, "").replace(/-/g, "").toUpperCase().trim();
+    return txt.toString()
+        .replace(/\s+/g, "")
+        .replace(/-/g, "")
+        .toUpperCase()
+        .trim();
 }
 
-function esc(s) {
-    return s.toString().replace(/</g, "&lt;");
+function esc(str) {
+    return str.toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
 }
 
+// ==================== TABLA ====================
 function construirTabla(r) {
     return `
         <table>
             <tr>
-                <th>SERIE</th><th>BOLETA</th><th>FECHA</th><th>HORA</th>
-                <th>PLACA</th><th>TIPO</th><th>MARCA</th><th>COLOR</th>
-                <th>DIRECCIÓN</th><th>DEPTO</th><th>MUNI</th><th>CONDUCTOR</th>
-                <th>LIC</th><th>No. LICENCIA</th><th>ARTÍCULO</th>
-                <th>DESCRIPCIÓN</th><th>CHAPA</th>
+                <th>SERIE</th>
+                <th>BOLETA</th>
+                <th>FECHA</th>
+                <th>HORA</th>
+                <th>PLACA</th>
+                <th>TIPO</th>
+                <th>MARCA</th>
+                <th>COLOR</th>
+                <th>DIRECCIÓN</th>
+                <th>DEPARTAMENTO</th>
+                <th>MUNICIPIO</th>
+                <th>CONDUCTOR</th>
+                <th>LIC</th>
+                <th>No. LICENCIA</th>
+                <th>ARTÍCULO</th>
+                <th>DESCRIPCIÓN</th>
+                <th>CHAPA</th>
             </tr>
             <tr>
                 <td>${esc(r.serie)}</td>
@@ -66,25 +91,29 @@ function construirTabla(r) {
     `;
 }
 
-// ====================== BUSCADOR ======================
+// ==================== BUSCADOR ====================
 function buscar() {
-
     const texto = document.getElementById("busquedaInput").value.trim();
-    if (!texto) return;
-
-    ultimoFiltro = texto;
     const limpio = normalizar(texto);
+
+    ultimoFiltro = texto;   // PRO MAX: guardamos lo que se buscó
 
     const divPrincipal = document.getElementById("resultado-principal");
     const divSim = document.getElementById("similares-contenedor");
+
     divSim.innerHTML = "";
     similares = [];
+
+    if (!texto) {
+        divPrincipal.innerHTML = "<p>Ingrese una búsqueda válida.</p>";
+        return;
+    }
 
     const coincidencias = [];
 
     registros.forEach(reg => {
-
         let p = 0;
+
         if (normalizar(reg.chapa) === limpio) p = 110;
         if (normalizar(reg.placa) === limpio) p = 100;
         if (normalizar(reg.licencia) === limpio) p = 90;
@@ -102,13 +131,17 @@ function buscar() {
 
     coincidencias.sort((a, b) => b.p - a.p);
 
-    divPrincipal.innerHTML = construirTabla(coincidencias[0].reg);
+    const principal = coincidencias[0].reg;
+    const otros = coincidencias.slice(1).map(c => c.reg);
 
-    similares = coincidencias.slice(1).map(c => c.reg);
+    divPrincipal.innerHTML = construirTabla(principal);
 
-    if (similares.length > 0) {
+    if (otros.length > 0) {
+        similares = otros;
+
         let ops = "<option value=''>-- seleccionar --</option>";
-        similares.forEach((r, i) => {
+
+        otros.forEach((r, i) => {
             ops += `<option value="${i}">Placa ${r.placa} · Chapa ${r.chapa} · ${r.tipo}</option>`;
         });
 
@@ -129,7 +162,9 @@ function mostrarSimilar(i) {
         construirTabla(similares[i]);
 }
 
-// ====================== EXPORTAR ======================
+// =============================================
+//         ⭐ EXPORTAR EXCEL PRO MAX ⭐
+// =============================================
 function exportarExcelPRO() {
 
     if (!ultimoFiltro) {
@@ -154,11 +189,13 @@ function exportarExcelPRO() {
     }
 
     const hoja = XLSX.utils.json_to_sheet(datos);
+
     const libro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(libro, hoja, "MULTAS");
 
-    const nombre = `MULTAS_${ultimoFiltro.toUpperCase()}.xlsx`;
+    const nombre = `MULTAS_${ultimoFiltro.toUpperCase()}_${new Date().toLocaleDateString("es-GT")}.xlsx`;
 
     XLSX.writeFile(libro, nombre);
+
     alert("Archivo Excel PRO MAX descargado ✨");
 }
