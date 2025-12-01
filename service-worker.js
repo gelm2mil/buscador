@@ -5,19 +5,19 @@ const FILES = [
     "index.html",
     "styles.css",
     "app.js",
+    "manifest.json",
     "icons/logo.png",
-    "icons/icon-512.png",
-    "manifest.json"
+    "icons/icon-512.png"
 ];
 
-// INSTALAR CACHE
+// INSTALAR
 self.addEventListener("install", e => {
     e.waitUntil(
-        caches.open(CACHE).then(c => c.addAll(FILES))
+        caches.open(CACHE).then(cache => cache.addAll(FILES))
     );
 });
 
-// ACTIVAR (limpia versiones viejas)
+// ACTIVAR (limpiar versiones viejas)
 self.addEventListener("activate", e => {
     e.waitUntil(
         caches.keys().then(keys =>
@@ -29,16 +29,16 @@ self.addEventListener("activate", e => {
 // FETCH
 self.addEventListener("fetch", e => {
 
-    const url = e.request.url;
-
-    // 🟢 Permitir SIEMPRE descargar placas.json SIN bloquearlo
-    if (url.includes("placas.json")) {
-        e.respondWith(fetch(e.request));
+    // ⚠ permitir SIEMPRE que placas.json se descargue online sin bloquearlo
+    if (e.request.url.includes("placas.json")) {
+        e.respondWith(fetch(e.request));  // <-- siempre respuesta válida
         return;
     }
 
-    // 🟢 Todo lo demás: cache FIRST
+    // MODO CACHE NORMAL
     e.respondWith(
-        caches.match(e.request).then(resp => resp || fetch(e.request))
+        caches.match(e.request).then(resp => {
+            return resp || fetch(e.request);
+        })
     );
 });
