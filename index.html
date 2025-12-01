@@ -52,6 +52,7 @@ body{
   gap:10px;
   margin-bottom:16px;
 }
+
 .app-title{
   font-size:20px;
   letter-spacing:2px;
@@ -59,6 +60,7 @@ body{
   color:var(--cian);
   text-shadow:0 0 14px rgba(0,255,230,0.9);
 }
+
 .app-sub{
   font-size:11px;
   color:#a0f7ff;
@@ -70,8 +72,8 @@ body{
   padding:3px 10px;
   border-radius:999px;
   border:1px solid rgba(0,255,230,0.6);
-  color:var(--accent);
   background:linear-gradient(90deg,rgba(0,0,0,0.7),rgba(0,0,0,0.2));
+  color:var(--accent);
 }
 
 .search-panel{
@@ -81,9 +83,10 @@ body{
   gap:12px;
   align-items:end;
 }
+
 @media(max-width:780px){
   .search-panel{
-    grid-template-columns:minmax(0,1fr);
+    grid-template-columns:1fr;
   }
 }
 
@@ -92,6 +95,7 @@ body{
   flex-direction:column;
   gap:5px;
 }
+
 label{
   font-size:12px;
   text-transform:uppercase;
@@ -106,9 +110,10 @@ input[type="text"]{
   padding:10px 12px;
   font-size:15px;
   color:var(--text);
-  outline:none;
   box-shadow:var(--shadow-soft);
+  outline:none;
 }
+
 input[type="text"]::placeholder{
   color:#788a90;
 }
@@ -123,15 +128,15 @@ input[type="text"]::placeholder{
   background:linear-gradient(135deg,rgba(0,0,0,0.85),rgba(0,10,20,0.96));
   box-shadow:var(--shadow-soft);
 }
+
 .mode-toggle label{
   display:flex;
   align-items:center;
   gap:4px;
   font-size:12px;
-  letter-spacing:0.5px;
-  text-transform:none;
   color:#e1ffff;
 }
+
 .mode-toggle input{
   accent-color:var(--cian);
 }
@@ -150,38 +155,41 @@ input[type="text"]::placeholder{
   box-shadow:0 0 16px rgba(0,255,230,0.8);
   transition:transform .12s ease-out,box-shadow .12s ease-out,filter .12s ease-out;
 }
+
 .btn:hover{
   transform:translateY(-1px) scale(1.02);
   box-shadow:0 0 24px rgba(0,255,230,1);
   filter:brightness(1.05);
 }
+
 .btn:active{
   transform:translateY(1px) scale(0.98);
   box-shadow:0 0 14px rgba(0,255,230,0.7);
 }
 
-/* summary */
 .summary{
   margin-top:10px;
   font-size:12px;
-  color:#d0f9ff;
   min-height:18px;
+  color:#d0f9ff;
 }
 
-/* selector resultados */
 .results-panel{
   margin-top:16px;
   display:none;
 }
+
 .results-panel.active{
   display:block;
 }
+
 .results-header{
   font-size:12px;
   margin-bottom:6px;
   color:#bffcff;
 }
-select#resultadoSelect{
+
+#resultadoSelect{
   width:100%;
   background:#050910;
   color:var(--text);
@@ -192,7 +200,6 @@ select#resultadoSelect{
   box-shadow:var(--shadow-soft);
 }
 
-/* tarjeta detalle */
 .detalle{
   margin-top:18px;
   padding:14px 14px 10px;
@@ -201,16 +208,18 @@ select#resultadoSelect{
   border:1px solid rgba(0,255,230,0.45);
   box-shadow:0 0 26px rgba(0,0,0,0.95),0 0 28px rgba(0,255,230,0.35);
 }
+
 .detalle-title{
   font-size:15px;
   margin-bottom:6px;
   color:var(--verde);
   text-shadow:0 0 10px rgba(0,255,106,0.8);
 }
+
 .detalle-sub{
   font-size:11px;
-  color:#9be8ff;
   margin-bottom:10px;
+  color:#9be8ff;
 }
 
 .table{
@@ -218,42 +227,45 @@ select#resultadoSelect{
   border-collapse:collapse;
   font-size:12px;
 }
+
 .table tr:nth-child(odd){
-  background:rgba(255,255,255,0.01);
+  background:rgba(255,255,255,0.02);
 }
-.table th,
-.table td{
+
+.table th, .table td{
   padding:4px 6px;
   text-align:left;
 }
+
 .table th{
   color:#8de8ff;
   font-weight:600;
   text-transform:uppercase;
   font-size:11px;
-  letter-spacing:0.5px;
 }
+
 .table td{
   color:#f0faff;
 }
 
-/* mensajes */
 .msg{
   margin-top:12px;
   font-size:12px;
 }
+
 .msg.error{
   color:var(--danger);
 }
+
 .msg.info{
   color:#b8f4ff;
 }
+
 .highlight{
-  color:var(--accent);
   font-weight:600;
+  color:var(--accent);
 }
 
-/* footer */
 .footer{
   margin-top:10px;
   font-size:10px;
@@ -262,28 +274,32 @@ select#resultadoSelect{
 }
 </style>
 </head>
+
 <body>
 <div class="app">
+
   <div class="app-header">
     <div>
       <div class="app-title">Buscador PMT</div>
-      <div class="app-sub">Placas &middot; N&uacute;mero de licencia &middot; Historial</div>
+      <div class="app-sub">Placas · Número de licencia · Historial</div>
     </div>
-    <div class="badge">M&oacute;dulo independiente :: by--gelm::</div>
+    <div class="badge">Módulo independiente :: by gelm</div>
   </div>
 
   <div class="search-panel">
     <div class="field">
-      <label for="query">Texto de b&uacute;squeda</label>
-      <input id="query" type="text" placeholder="Ej: M-098HJX  &middot;  1918-61907-0805  &middot;  1918619070805">
+      <label for="query">Texto de búsqueda</label>
+      <input id="query" type="text" placeholder="Ej: M-098HJX · 1918-61907-0805 · 1918619070805">
     </div>
+
     <div class="field">
       <label>Modo</label>
       <div class="mode-toggle">
         <label><input type="radio" name="mode" value="placa" checked> Por placa</label>
-        <label><input type="radio" name="mode" value="licencia"> Por n&uacute;mero de licencia</label>
+        <label><input type="radio" name="mode" value="licencia"> Por número de licencia</label>
       </div>
     </div>
+
     <div class="field">
       <button id="btnBuscar" class="btn">Buscar</button>
     </div>
@@ -300,159 +316,140 @@ select#resultadoSelect{
 
   <div id="msg" class="msg info"></div>
 
-  <div class="footer">
-    PMT Chimaltenango &bull; M&oacute;dulo interno de consulta
-  </div>
+  <div class="footer">PMT Chimaltenango • Módulo interno de consulta</div>
+
 </div>
 
 <script>
-const DATA_URL = 'placas.json'; // mismo directorio
+const DATA_URL = "placas.json";
 
 let registros = [];
 let ultimosResultados = [];
 
 function normalizarPlaca(txt){
-  if(!txt) return '';
-  return txt.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  return txt ? txt.toUpperCase().replace(/[^A-Z0-9]/g,"") : "";
 }
+
 function normalizarLicencia(txt){
-  if(!txt) return '';
-  return txt.replace(/[^0-9A-Za-z]/g,''); // quita guiones, espacios, etc.
+  return txt ? txt.replace(/[^A-Za-z0-9]/g,"") : "";
 }
 
 async function cargarDatos(){
   try{
-    const resp = await fetch(DATA_URL,{cache:'no-store'});
+    const resp = await fetch(DATA_URL,{cache:"no-store"});
     registros = await resp.json();
-    document.getElementById('msg').textContent =
-      'Base cargada: ' + registros.length + ' registros disponibles.';
+    document.getElementById("msg").textContent =
+      "Base cargada: " + registros.length + " registros disponibles.";
   }catch(e){
-    console.error(e);
-    document.getElementById('msg').textContent =
-      'Error cargando la base de datos (placas.json).';
-    document.getElementById('msg').className = 'msg error';
+    document.getElementById("msg").textContent =
+    "Error cargando la base de datos (placas.json).";
+    document.getElementById("msg").className = "msg error";
   }
 }
 
 function buscar(){
-  const qRaw = document.getElementById('query').value.trim();
-  const mode = document.querySelector('input[name="mode"]:checked').value;
-  const summary = document.getElementById('summary');
-  const msg = document.getElementById('msg');
-  const panel = document.getElementById('resultsPanel');
-  const select = document.getElementById('resultadoSelect');
-  const detalle = document.getElementById('detalle');
+  const qRaw = document.getElementById("query").value.trim();
+  const mode = document.querySelector("input[name='mode']:checked").value;
+  const summary = document.getElementById("summary");
+  const msg = document.getElementById("msg");
+  const panel = document.getElementById("resultsPanel");
+  const select = document.getElementById("resultadoSelect");
+  const detalle = document.getElementById("detalle");
 
-  detalle.style.display = 'none';
-  detalle.innerHTML = '';
-  panel.classList.remove('active');
-  select.innerHTML = '';
-  msg.textContent = '';
-  msg.className = 'msg info';
+  detalle.style.display = "none";
+  detalle.innerHTML = "";
+  panel.classList.remove("active");
+  select.innerHTML = "";
+  msg.textContent = "";
+  msg.className = "msg info";
 
   if(!qRaw){
-    summary.textContent = '';
-    msg.textContent = 'Escribe una placa o un número de licencia para iniciar la búsqueda.';
+    summary.textContent = "";
+    msg.textContent = "Escribe una placa o número de licencia para iniciar la búsqueda.";
     return;
   }
 
-  let qNorm;
-  if(mode === 'placa'){
-    qNorm = normalizarPlaca(qRaw);
-  }else{
-    qNorm = normalizarLicencia(qRaw);
-  }
+  let qNorm = mode === "placa" ? normalizarPlaca(qRaw) : normalizarLicencia(qRaw);
+
   if(!qNorm){
-    summary.textContent = '';
-    msg.textContent = 'El texto ingresado no contiene caracteres válidos.';
+    summary.textContent = "";
+    msg.textContent = "El texto ingresado no contiene caracteres válidos.";
     return;
   }
 
-  let resultados;
-  if(mode === 'placa'){
-    resultados = registros.filter(r => r.placa_norm && r.placa_norm.includes(qNorm));
-  }else{
-    resultados = registros.filter(r => r.licencia_norm && r.licencia_norm.includes(qNorm));
-  }
+  let resultados = mode === "placa"
+    ? registros.filter(r => r.placa_norm && r.placa_norm.includes(qNorm))
+    : registros.filter(r => r.licencia_norm && r.licencia_norm.includes(qNorm));
 
   ultimosResultados = resultados;
 
   if(!resultados.length){
-    summary.innerHTML = 'Sin resultados para <span class="highlight">'+qRaw+'</span> ('+mode+').';
-    msg.textContent = 'Verifica si la placa o licencia está bien escrita. Recuerda que la búsqueda ignora espacios y guiones.';
-    msg.className = 'msg error';
+    summary.innerHTML = 'Sin resultados para <span class="highlight">'+qRaw+'</span>.';
+    msg.textContent = "Verifica si la placa o licencia está bien escrita.";
+    msg.className = "msg error";
     return;
   }
 
-  summary.innerHTML = 'Se encontraron <span class="highlight">'+resultados.length+'</span> coincidencia(s) para <span class="highlight">'+qRaw+'</span> buscando por '+mode+'.';
+  summary.innerHTML =
+    'Se encontraron <span class="highlight">'+resultados.length+
+    "</span> coincidencia(s) para <span class='highlight'>"+qRaw+"</span>";
 
   if(resultados.length === 1){
     mostrarDetalle(resultados[0]);
   }else{
-    panel.classList.add('active');
+    panel.classList.add("active");
     resultados.forEach((r,idx)=>{
-      const opt = document.createElement('option');
-      const placa = r.placa || 'SIN PLACA';
-      const lic = r.licencia || 'SIN LICENCIA';
-      const fecha = r.fecha || '';
-      const boleta = r.boleta || '';
+      const opt = document.createElement("option");
       opt.value = idx;
-      opt.textContent = placa+'  |  Lic: '+lic+'  |  Boleta: '+boleta+'  |  '+fecha;
+      opt.textContent =
+        (r.placa || "SIN PLACA")+" | Lic: "+(r.licencia || "SIN LICENCIA")+
+        " | Boleta: "+(r.boleta || "")+" | "+(r.fecha || "");
       select.appendChild(opt);
     });
-    if(resultados.length){
-      select.selectedIndex = 0;
-      mostrarDetalle(resultados[0]);
-    }
+    select.selectedIndex = 0;
+    mostrarDetalle(resultados[0]);
   }
 }
 
 function mostrarDetalle(reg){
-  const detalle = document.getElementById('detalle');
-  if(!reg){
-    detalle.style.display = 'none';
-    detalle.innerHTML = '';
-    return;
-  }
-  detalle.style.display = 'block';
-
-  const placa = reg.placa || 'SIN PLACA';
-  const lic = reg.licencia || 'SIN LICENCIA';
+  const detalle = document.getElementById("detalle");
+  detalle.style.display = "block";
 
   detalle.innerHTML = `
-    <div class="detalle-title">Placa ${placa}</div>
-    <div class="detalle-sub">No. licencia: <span class="highlight">${lic}</span> &middot; Boleta: ${reg.boleta || ''} &middot; Fecha: ${reg.fecha || ''} &middot; Hora: ${reg.hora || ''}</div>
+    <div class="detalle-title">Placa ${reg.placa || "SIN PLACA"}</div>
+    <div class="detalle-sub">No. licencia: <span class="highlight">${reg.licencia || "SIN LICENCIA"}</span>
+    · Boleta: ${reg.boleta || ""} · Fecha: ${reg.fecha || ""} · Hora: ${reg.hora || ""}</div>
+
     <table class="table">
       <tbody>
-        <tr><th>Serie</th><td>${reg.serie || ''}</td></tr>
-        <tr><th>Tipo</th><td>${reg.tipo || ''}</td></tr>
-        <tr><th>Marca</th><td>${reg.marca || ''}</td></tr>
-        <tr><th>Color</th><td>${reg.color || ''}</td></tr>
-        <tr><th>Direcci&oacute;n</th><td>${reg.direccion || ''}</td></tr>
-        <tr><th>Departamento</th><td>${reg.departamento || ''}</td></tr>
-        <tr><th>Municipio</th><td>${reg.municipio || ''}</td></tr>
-        <tr><th>Conductor</th><td>${reg.conductor || ''}</td></tr>
-        <tr><th>Art&iacute;culo</th><td>${reg.articulo || ''}</td></tr>
-        <tr><th>Descripci&oacute;n</th><td>${reg.descripcion || ''}</td></tr>
-        <tr><th>Chapa</th><td>${reg.chapa || ''}</td></tr>
+        <tr><th>Serie</th><td>${reg.serie || ""}</td></tr>
+        <tr><th>Tipo</th><td>${reg.tipo || ""}</td></tr>
+        <tr><th>Marca</th><td>${reg.marca || ""}</td></tr>
+        <tr><th>Color</th><td>${reg.color || ""}</td></tr>
+        <tr><th>Dirección</th><td>${reg.direccion || ""}</td></tr>
+        <tr><th>Departamento</th><td>${reg.departamento || ""}</td></tr>
+        <tr><th>Municipio</th><td>${reg.municipio || ""}</td></tr>
+        <tr><th>Conductor</th><td>${reg.conductor || ""}</td></tr>
+        <tr><th>Artículo</th><td>${reg.articulo || ""}</td></tr>
+        <tr><th>Descripción</th><td>${reg.descripcion || ""}</td></tr>
+        <tr><th>Chapa</th><td>${reg.chapa || ""}</td></tr>
       </tbody>
     </table>
   `;
 }
 
-document.getElementById('btnBuscar').addEventListener('click', buscar);
-document.getElementById('query').addEventListener('keydown', e=>{
-  if(e.key === 'Enter') buscar();
-});
-document.getElementById('resultadoSelect').addEventListener('change', e=>{
-  const idx = parseInt(e.target.value,10);
-  if(!isNaN(idx) && ultimosResultados[idx]){
-    mostrarDetalle(ultimosResultados[idx]);
-  }
+document.getElementById("btnBuscar").addEventListener("click", buscar);
+document.getElementById("query").addEventListener("keydown", e=>{
+  if(e.key === "Enter") buscar();
 });
 
-// carga inicial
+document.getElementById("resultadoSelect").addEventListener("change", e=>{
+  const idx = parseInt(e.target.value,10);
+  if(ultimosResultados[idx]) mostrarDetalle(ultimosResultados[idx]);
+});
+
 cargarDatos();
 </script>
+
 </body>
 </html>
