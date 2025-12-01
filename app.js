@@ -1,5 +1,5 @@
 // ==================== CONFIG ====================
-const DATA_URL = "https://raw.githubusercontent.com/gelm2mil/buscador/main/placas.json";
+const DATA_URL = "placas.json";   // Corrección: carga local, compatible con GitHub Pages y APK
 
 let registros = [];
 let similares = [];
@@ -50,6 +50,7 @@ function construirTabla(r) {
                 <th>SERIE</th>
                 <th>BOLETA</th>
                 <th>FECHA</th>
+                <th>FECHA 2</th>
                 <th>HORA</th>
                 <th>PLACA</th>
                 <th>TIPO</th>
@@ -69,6 +70,7 @@ function construirTabla(r) {
                 <td>${esc(r.serie)}</td>
                 <td>${esc(r.boleta)}</td>
                 <td>${esc(r.fecha)}</td>
+                <td>${esc(r.fecha2)}</td>
                 <td>${esc(r.hora)}</td>
                 <td>${esc(r.placa)}</td>
                 <td>${esc(r.tipo)}</td>
@@ -110,11 +112,15 @@ function buscar() {
     registros.forEach(reg => {
         let p = 0;
 
-        if (normalizar(reg.chapa) === limpio) p = 110;
-        if (normalizar(reg.placa) === limpio) p = 100;
+        // Prioridades altas
+        if (normalizar(reg.chapa) === limpio) p = 120;
+        if (normalizar(reg.placa) === limpio) p = 110;
+
+        // Licencias, boleta
         if (normalizar(reg.licencia) === limpio) p = 90;
         if (normalizar(reg.boleta) === limpio) p = 80;
-        if (normalizar(reg.dpi) === limpio) p = 70;
+
+        // Búsqueda en descripción (palabras)
         if (normalizar(reg.descripcion).includes(limpio)) p = 60;
 
         if (p > 0) coincidencias.push({ reg, p });
@@ -138,7 +144,9 @@ function buscar() {
         let ops = "<option value=''>-- seleccionar --</option>";
 
         otros.forEach((r, i) => {
-            ops += `<option value="${i}">Placa ${r.placa} · Chapa ${r.chapa} · ${r.tipo}</option>`;
+            ops += `<option value="${i}">
+            Placa ${r.placa} · Chapa ${r.chapa} · ${r.tipo}
+            </option>`;
         });
 
         divSim.innerHTML = `
@@ -157,11 +165,3 @@ function mostrarSimilar(i) {
     document.getElementById("resultado-principal").innerHTML =
         construirTabla(similares[i]);
 }
-
-// ==================== FECHA/HORA ====================
-setInterval(() => {
-    const f = new Date();
-    document.getElementById("fechaHora").textContent =
-        f.toLocaleDateString("es-ES", { weekday:"long", year:"numeric", month:"long", day:"numeric" }) +
-        " — " + f.toLocaleTimeString("es-ES");
-}, 1000);
