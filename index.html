@@ -88,9 +88,15 @@ function actualizarFechaHora() {
 setInterval(actualizarFechaHora, 1000);
 actualizarFechaHora();
 </script>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+}
+</script>
 
 </body>
 </html>
+
 
 
 
