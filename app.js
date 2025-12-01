@@ -1,8 +1,9 @@
 // ==================== CONFIG ====================
-const DATA_URL = "placas.json";   // Corrección: carga local, compatible con GitHub Pages y APK
+const DATA_URL = "https://raw.githubusercontent.com/gelm2mil/buscador/main/placas.json";
 
 let registros = [];
 let similares = [];
+let ultimoFiltro = "";  // <- PRO MAX: para saber qué se exportará
 
 document.addEventListener("DOMContentLoaded", cargarJSON);
 
@@ -50,7 +51,6 @@ function construirTabla(r) {
                 <th>SERIE</th>
                 <th>BOLETA</th>
                 <th>FECHA</th>
-                <th>FECHA 2</th>
                 <th>HORA</th>
                 <th>PLACA</th>
                 <th>TIPO</th>
@@ -70,7 +70,6 @@ function construirTabla(r) {
                 <td>${esc(r.serie)}</td>
                 <td>${esc(r.boleta)}</td>
                 <td>${esc(r.fecha)}</td>
-                <td>${esc(r.fecha2)}</td>
                 <td>${esc(r.hora)}</td>
                 <td>${esc(r.placa)}</td>
                 <td>${esc(r.tipo)}</td>
@@ -96,6 +95,8 @@ function buscar() {
     const limpio = normalizar(texto);
     const valor = texto.toUpperCase();
 
+    ultimoFiltro = texto;   // <- PRO MAX: guardamos lo que se buscó
+
     const divPrincipal = document.getElementById("resultado-principal");
     const divSim = document.getElementById("similares-contenedor");
 
@@ -112,15 +113,12 @@ function buscar() {
     registros.forEach(reg => {
         let p = 0;
 
-        // Prioridades altas
-        if (normalizar(reg.chapa) === limpio) p = 120;
-        if (normalizar(reg.placa) === limpio) p = 110;
-
-        // Licencias, boleta
+        if (normalizar(reg.chapa) === limpio) p = 110;
+        if (normalizar(reg.placa) === limpio) p = 100;
         if (normalizar(reg.licencia) === limpio) p = 90;
         if (normalizar(reg.boleta) === limpio) p = 80;
+        if (normalizar(reg.dpi) === limpio) p = 70;
 
-        // Búsqueda en descripción (palabras)
         if (normalizar(reg.descripcion).includes(limpio)) p = 60;
 
         if (p > 0) coincidencias.push({ reg, p });
@@ -144,9 +142,7 @@ function buscar() {
         let ops = "<option value=''>-- seleccionar --</option>";
 
         otros.forEach((r, i) => {
-            ops += `<option value="${i}">
-            Placa ${r.placa} · Chapa ${r.chapa} · ${r.tipo}
-            </option>`;
+            ops += `<option value="${i}">Placa ${r.placa} · Chapa ${r.chapa} · ${r.tipo}</option>`;
         });
 
         divSim.innerHTML = `
@@ -164,4 +160,47 @@ function mostrarSimilar(i) {
     if (isNaN(i)) return;
     document.getElementById("resultado-principal").innerHTML =
         construirTabla(similares[i]);
+}
+
+// =============================================
+//         ⭐ EXPORTAR EXCEL PRO MAX ⭐
+// =============================================
+function exportarExcelPRO() {
+
+    if (!ultimoFiltro) {
+        alert("Papi, primero hacé una búsqueda.");
+        return;
+    }
+
+    const limpio = normalizar(ultimoFiltro);
+
+    // Filtrar coincidencias reales EXCEL
+    const datos = registros.filter(reg =>
+        normalizar(reg.chapa) === limpio ||
+        normalizar(reg.placa) === limpio ||
+        normalizar(reg.licencia) === limpio ||
+        normalizar(reg.boleta) === limpio ||
+        normalizar(reg.dpi) === limpio ||
+        normalizar(reg.descripcion).includes(limpio)
+    );
+
+    if (datos.length === 0) {
+        alert("No hay datos para exportar 😢");
+        return;
+    }
+
+    // Convertir a hoja
+    const hoja = XLSX.utils.json_to_sheet(datos);
+
+    // Crear libro Excel
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "MULTAS");
+
+    // Nombre dinámico del archivo
+    const nombre = `MULTAS_${ultimoFiltro.toUpperCase()}_${new Date().toLocaleDateString("es-GT")}.xlsx`;
+
+    // Descargar
+    XLSX.writeFile(libro, nombre);
+
+    alert("Archivo Excel PRO MAX descargado ✨");
 }
