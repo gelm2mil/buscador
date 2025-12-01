@@ -20,7 +20,7 @@ self.addEventListener("install", e => {
 // ACTIVAR (LIMPIA CACHES VIEJOS)
 self.addEventListener("activate", e => {
     e.waitUntil(
-        caches.keys().then(keys => 
+        caches.keys().then(keys =>
             Promise.all(
                 keys.map(k => (k !== CACHE ? caches.delete(k) : null))
             )
@@ -28,13 +28,15 @@ self.addEventListener("activate", e => {
     );
 });
 
-// FETCH (NO CACHE para placas.json)
+// FETCH
 self.addEventListener("fetch", e => {
+
+    // 🟢 Permitimos que siempre cargue la versión nueva del JSON
     if (e.request.url.includes("placas.json")) {
-        // siempre forzar descarga real del JSON
-        return;
+        return fetch(e.request);
     }
 
+    // 🟢 Cache-first para todo lo demás
     e.respondWith(
         caches.match(e.request).then(resp => resp || fetch(e.request))
     );
